@@ -1,15 +1,15 @@
 site:
-  backend-secret: ${SECRET_KEY}
+  backend-secret: my-super-secret-key-12345
 
 aws:
   credentials:
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    access-key: AKIAZWQVTUYNV22YMXGE
+    secret-key: 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
   s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME}
-    region: ${AWS_REGION}
+    bucket-name: mejisue-website
+    region: ap-northeast-2
   cloudfront:
-    domain: ${AWS_CLOUDFRONT_DOMAIN}
+    domain: d2emnz1krfjsht.cloudfront.net
 
 spring:
   # 데이터베이스 연결 설정
