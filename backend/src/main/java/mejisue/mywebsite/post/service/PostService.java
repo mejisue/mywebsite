@@ -1,0 +1,53 @@
+package mejisue.mywebsite.post.service;
+
+import lombok.RequiredArgsConstructor;
+import mejisue.mywebsite.post.domain.Post;
+import mejisue.mywebsite.post.domain.PostImage;
+import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Service
+@RequiredArgsConstructor
+public class PostService {
+
+    private final PostRepository postRepository;
+
+    @Value("${aws.cloudfront.domain}")
+    private String cloudfrontDomain;
+
+    @Transactional
+    public Post savePost(CreatePostRequest request) {
+        Post post = new Post();
+        post.setTitle(request.title());
+        post.setContent(request.content());
+        post.setTags(request.tags());
+        post.setImages(extractImages(request.content()));
+        return postRepository.save(post);
+    }
+
+    // content 안의 CloudFront URL을 정규식으로 추출해 PostImage 리스트 반환
+    private List<PostImage> extractImages(String content) {
+        if (content == null || content.isBlank()) return List.of();
+
+        List<PostImage> images = new ArrayList<>();
+        Pattern pattern = Pattern.compile("https://" + Pattern.quote(cloudfrontDomain) + "/([^\\s)\"]+)");
+        Matcher matcher = pattern.matcher(content);
+
+        while (matcher.find()) {
+            PostImage image = new PostImage();
+            image.setImageUrl(matcher.group(0)); // 전체 URL: https://domain/posts/uuid.jpg
+            image.setS3Key(matcher.group(1));    // S3 key: posts/uuid.jpg
+            images.add(image);
+        }
+
+        return images;
+    }
+}
