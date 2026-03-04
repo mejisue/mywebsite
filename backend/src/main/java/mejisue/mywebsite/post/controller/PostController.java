@@ -3,6 +3,7 @@ package mejisue.mywebsite.post.controller;
 import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.service.PostService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,5 +18,10 @@ public class PostController {
     @PostMapping
     public Post createPost(@RequestBody CreatePostRequest request) {
         return postService.savePost(request);
+    }
+
+    @PutMapping("/{id}")
+    public Post updatePost(@PathVariable Long id, @RequestBody UpdatePostRequest request) {
+        return postService.updatePost(id, request);
     }
 }
