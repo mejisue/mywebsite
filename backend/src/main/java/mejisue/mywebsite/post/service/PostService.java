@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,20 @@ public class PostService {
         post.setTags(request.tags());
         post.setImages(extractImages(request.content()));
         return postRepository.save(post);
+    }
+
+    @Transactional
+    public Post updatePost(Long id, UpdatePostRequest request) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. id=" + id));
+
+        post.setTitle(request.title());
+        post.setContent(request.content());
+        post.setTags(request.tags());
+        post.getImages().clear();
+        post.getImages().addAll(extractImages(request.content()));
+
+        return post;
     }
 
     // content 안의 CloudFront URL을 정규식으로 추출해 PostImage 리스트 반환

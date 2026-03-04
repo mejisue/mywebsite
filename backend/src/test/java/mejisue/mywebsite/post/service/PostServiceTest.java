@@ -61,4 +61,39 @@ class PostServiceTest {
                 .isEqualTo("posts/uuid.jpg");
     }
 
+    @Test
+    void 게시물_수정_성공() {
+        // given
+        Post existing = new Post();
+        existing.setTitle("원본 제목");
+        existing.setContent("원본 내용");
+        existing.setTags(List.of("java"));
+
+        given(postRepository.findById(1L)).willReturn(Optional.of(existing));
+
+        UpdatePostRequest request = new UpdatePostRequest("수정된 제목", "수정된 내용", List.of("spring"));
+
+        // when
+        Post result = postService.updatePost(1L, request);
+
+        // then
+        assertThat(result.getTitle()).isEqualTo("수정된 제목");
+        assertThat(result.getContent()).isEqualTo("수정된 내용");
+        assertThat(result.getTags()).containsExactly("spring");
+    }
+
+    @Test
+    void 존재하지_않는_게시물_수정_시_예외() {
+        // given
+        given(postRepository.findById(99L)).willReturn(Optional.empty());
+
+        UpdatePostRequest request = new UpdatePostRequest("제목", "내용", List.of());
+
+        // when & then
+        assertThatThrownBy(() -> postService.updatePost(99L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("게시물을 찾을 수 없습니다");
+    }
+
+
 }
