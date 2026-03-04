@@ -62,6 +62,34 @@ class PostServiceTest {
     }
 
     @Test
+    void 게시물_단건_조회_성공() {
+        // given
+        Post post = new Post();
+        post.setTitle("제목");
+        post.setContent("내용");
+
+        given(postRepository.findById(1L)).willReturn(Optional.of(post));
+
+        // when
+        Post result = postService.getPost(1L);
+
+        // then
+        assertThat(result.getTitle()).isEqualTo("제목");
+        assertThat(result.getContent()).isEqualTo("내용");
+    }
+
+    @Test
+    void 존재하지_않는_게시물_조회_시_예외() {
+        // given
+        given(postRepository.findById(99L)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> postService.getPost(99L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("게시물을 찾을 수 없습니다");
+    }
+
+    @Test
     void 게시물_수정_성공() {
         // given
         Post existing = new Post();

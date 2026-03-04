@@ -15,6 +15,11 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/{id}")
+    public Post getPost(@PathVariable Long id) {
+        return postService.getPost(id);
+    }
+
     @PostMapping
     public Post createPost(@RequestBody CreatePostRequest request) {
         return postService.savePost(request);

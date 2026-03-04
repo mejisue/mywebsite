@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,6 +47,36 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("테스트 제목"))
                 .andExpect(jsonPath("$.content").value("본문 내용입니다."));
+    }
+
+    @Test
+    void 게시물_단건_조회_성공() throws Exception {
+
+        CreatePostRequest createRequest = new CreatePostRequest(
+                "조회 테스트 제목",
+                "조회 테스트 내용",
+                List.of("java")
+        );
+
+        String response = mockMvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andReturn().getResponse().getContentAsString();
+
+        Long id = objectMapper.readTree(response).get("id").asLong();
+
+        // when & then
+        mockMvc.perform(get("/api/posts/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.title").value("조회 테스트 제목"))
+                .andExpect(jsonPath("$.content").value("조회 테스트 내용"));
+    }
+
+    @Test
+    void 존재하지_않는_게시물_조회_시_예외() throws Exception {
+        mockMvc.perform(get("/api/posts/99999"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
