@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,5 +74,12 @@ public class PostService {
         }
 
         return images;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostSummaryResponse> getAllPosts() {
+        return postRepository.findAll().stream()
+                .map(PostSummaryResponse::from)
+                .toList();
     }
 }

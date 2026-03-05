@@ -80,6 +80,26 @@ class PostControllerTest {
     }
 
     @Test
+    void 게시물_전체_조회_성공() throws Exception {
+        // given: 게시물 2개 생성
+        for (int i = 1; i <= 2; i++) {
+            mockMvc.perform(post("/api/posts")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    new CreatePostRequest("제목" + i, "내용" + i, List.of("tag")))))
+                    .andExpect(status().isOk());
+        }
+
+        // when & then
+        mockMvc.perform(get("/api/posts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].title").exists())
+                .andExpect(jsonPath("$[0].content").doesNotExist()) // content는 포함되지 않아야 함
+                .andExpect(jsonPath("$[0].thumbnail").doesNotExist());
+    }
+
+    @Test
     void 게시물_수정_성공() throws Exception {
         // given: 게시물 먼저 생성
         CreatePostRequest createRequest = new CreatePostRequest(

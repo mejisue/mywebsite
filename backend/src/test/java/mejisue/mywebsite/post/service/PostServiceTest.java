@@ -1,7 +1,9 @@
 package mejisue.mywebsite.post.service;
 
 import mejisue.mywebsite.post.domain.Post;
+import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,6 +89,34 @@ class PostServiceTest {
         assertThatThrownBy(() -> postService.getPost(99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시물을 찾을 수 없습니다");
+    }
+
+    @Test
+    void 게시물_전체_조회_성공() {
+        // given
+        Post post1 = new Post();
+        post1.setTitle("제목1");
+        post1.setTags(List.of("java"));
+
+        PostImage image = new PostImage();
+        image.setImageUrl("https://test.cloudfront.net/posts/thumb.jpg");
+        post1.getImages().add(image);
+
+        Post post2 = new Post();
+        post2.setTitle("제목2");
+        post2.setTags(List.of("spring"));
+
+        given(postRepository.findAll()).willReturn(List.of(post1, post2));
+
+        // when
+        List<PostSummaryResponse> result = postService.getAllPosts();
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).title()).isEqualTo("제목1");
+        assertThat(result.get(0).thumbnail()).isEqualTo("https://test.cloudfront.net/posts/thumb.jpg");
+        assertThat(result.get(1).title()).isEqualTo("제목2");
+        assertThat(result.get(1).thumbnail()).isNull(); // 이미지 없는 경우
     }
 
     @Test
