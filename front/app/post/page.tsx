@@ -1,6 +1,7 @@
 import { getPosts } from '@/lib/api/posts';
 import Image from 'next/image';
 import Link from 'next/link';
+import { formatTimeAgo } from '@/lib/time';
 
 export default async function PostListPage() {
     const posts = await getPosts();
@@ -42,7 +43,7 @@ export default async function PostListPage() {
                                         <span>ssookk</span>
                                         <span>·</span>
                                         {/* TODO: createdAt 필드가 entity에 추가되면 날짜로 교체 */}
-                                        <span>날짜 미정</span>
+                                        <span>{formatTimeAgo(post.createdAt)}</span>
                                     </div>
                                 </div>
 

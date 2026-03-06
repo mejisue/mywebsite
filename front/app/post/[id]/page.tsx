@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DeletePostButton from './_components/DeletePostButton';
+import { formatTimeAgo } from '@/lib/time';
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -22,7 +23,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                         <span className="font-semibold text-neutral-800">ssookk</span>
                         <span>·</span>
                         {/* TODO: createdAt 필드가 entity에 추가되면 날짜로 교체 */}
-                        <span>날짜 미정</span>
+                        <span>{formatTimeAgo(post.createdAt)}</span>
                     </div>
                     {isAdmin && (
                         <div className="flex items-center gap-3">
