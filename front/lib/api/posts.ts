@@ -4,6 +4,12 @@ export type CreatePostRequest = {
     tags: string[];
 };
 
+export type UpdatePostRequest = {
+    title: string;
+    content: string;
+    tags: string[];
+};
+
 export type PostSummary = {
     id: number;
     title: string;
@@ -63,5 +69,19 @@ export async function createPost(data: CreatePostRequest): Promise<void> {
     });
     if (!res.ok) {
         throw new Error('출간에 실패했습니다.');
+    }
+}
+
+
+export async function updatePost(id: string, data: UpdatePostRequest): Promise<void> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!res.ok) {
+        throw new Error('게시물 수정에 실패했습니다.');
     }
 }
