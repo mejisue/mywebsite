@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import DeletePostButton from './_components/DeletePostButton';
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -28,9 +29,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                             <Link href={`/admin/write/${id}`} className="hover:text-neutral-800">
                                 수정
                             </Link>
-                            <button type="button" className="hover:text-red-500">
-                                삭제
-                            </button>
+                            <DeletePostButton id={id} />
                         </div>
                     )}
                 </div>

@@ -85,3 +85,12 @@ export async function updatePost(id: string, data: UpdatePostRequest): Promise<v
         throw new Error('게시물 수정에 실패했습니다.');
     }
 }
+
+export async function deletePost(id: string): Promise<void> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts/${id}`, {
+        method: 'DELETE',
+    });
+    if (!res.ok) {
+        throw new Error('게시물 삭제에 실패했습니다.');
+    }
+}
