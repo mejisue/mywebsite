@@ -15,6 +15,7 @@ export type PostSummary = {
     title: string;
     tags: string[];
     thumbnail: string | null;
+    createdAt: Date;
 };
 
 export type Post = {
@@ -22,7 +23,7 @@ export type Post = {
     title: string;
     content: string;
     tags: string[];
-    // TODO: createdAt - entity에 추가 후 활성화
+    createdAt: string;
 };
 
 export async function getPosts(): Promise<PostSummary[]> {
