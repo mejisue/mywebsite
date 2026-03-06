@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -145,6 +146,33 @@ class PostControllerTest {
         mockMvc.perform(put("/api/posts/99999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 게시물_삭제_성공() throws Exception {
+        // given: 게시물 생성
+        String response = mockMvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreatePostRequest("삭제 테스트 제목", "삭제 테스트 내용", List.of("java")))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Long id = objectMapper.readTree(response).get("id").asLong();
+
+        // when: 삭제
+        mockMvc.perform(delete("/api/posts/" + id))
+                .andExpect(status().isOk());
+
+        // then: 조회 시 404가 아닌 400 (IllegalArgumentException → badRequest)
+        mockMvc.perform(get("/api/posts/" + id))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 존재하지_않는_게시물_삭제_시_예외() throws Exception {
+        mockMvc.perform(delete("/api/posts/99999"))
                 .andExpect(status().isBadRequest());
     }
 

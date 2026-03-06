@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 /**
  * Spring 컨텍스트를 띄우지 않고 Mockito만 사용
@@ -149,6 +150,29 @@ class PostServiceTest {
 
         // when & then
         assertThatThrownBy(() -> postService.updatePost(99L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("게시물을 찾을 수 없습니다");
+    }
+
+    @Test
+    void 게시물_삭제_성공() {
+        // given
+        given(postRepository.existsById(1L)).willReturn(true);
+
+        // when
+        postService.deletePost(1L);
+
+        // then
+        verify(postRepository).deleteById(1L);
+    }
+
+    @Test
+    void 존재하지_않는_게시물_삭제_시_예외() {
+        // given
+        given(postRepository.existsById(99L)).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> postService.deletePost(99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시물을 찾을 수 없습니다");
     }

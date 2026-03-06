@@ -82,4 +82,12 @@ public class PostService {
                 .map(PostSummaryResponse::from)
                 .toList();
     }
+
+    @Transactional
+    public void deletePost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new IllegalArgumentException("게시물을 찾을 수 없습니다. id=" + id);
+        }
+        postRepository.deleteById(id);
+    }
 }
