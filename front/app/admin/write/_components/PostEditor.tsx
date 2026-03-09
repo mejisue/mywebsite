@@ -197,6 +197,7 @@ export default function PostEditor({
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="제목"
+                            required
                             className="w-full border-none bg-transparent text-4xl font-bold outline-none placeholder:text-neutral-400"
                         />
                     </div>
@@ -328,7 +329,13 @@ export default function PostEditor({
                         임시저장
                     </button>
                     <button
-                        onClick={() => onSubmit({ title, content, tags })}
+                        onClick={() => {
+                            if (!title.trim()) {
+                                toast.error('제목을 입력해주세요.');
+                                return;
+                            }
+                            onSubmit({ title, content, tags });
+                        }}
                         type="button"
                         disabled={isPending}
                         className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
