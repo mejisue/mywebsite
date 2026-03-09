@@ -60,7 +60,7 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
     return res.json();
 }
 
-export async function createPost(data: CreatePostRequest): Promise<void> {
+export async function createPost(data: CreatePostRequest): Promise<Post> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -71,6 +71,7 @@ export async function createPost(data: CreatePostRequest): Promise<void> {
     if (!res.ok) {
         throw new Error('출간에 실패했습니다.');
     }
+    return res.json();
 }
 
 

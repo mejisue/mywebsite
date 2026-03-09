@@ -4,12 +4,16 @@ import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { createPost } from '@/lib/api/posts';
 import PostEditor from './_components/PostEditor';
+import { useRouter } from 'next/navigation';
 
 export default function AdminWritePage() {
+    const router = useRouter();
+
     const { mutate: publishPost, isPending } = useMutation({
         mutationFn: createPost,
-        onSuccess: () => {
+        onSuccess: (post) => {
             toast.success('출간되었습니다.');
+            router.push(`/post/${post.id}`);
         },
         onError: () => {
             toast.error('출간에 실패했습니다.');
