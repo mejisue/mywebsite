@@ -7,10 +7,19 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DeletePostButton from './_components/DeletePostButton';
 import { formatTimeAgo } from '@/lib/time';
+import { notFound } from 'next/navigation';
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const [post, session] = await Promise.all([getPost(id), getServerSession(authOptions)]);
+
+    let post;
+    try {
+        post = await getPost(id);
+    } catch {
+        notFound();
+    }
+
+    const session = await getServerSession(authOptions);
     const isAdmin = session?.user?.email === process.env.ADMIN_EMAIL;
 
     return (
