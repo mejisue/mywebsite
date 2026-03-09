@@ -13,7 +13,7 @@ export default function DeletePostButton({ id }: { id: string }) {
     const { mutate: handleDeletePost, isPending } = useMutation({
         mutationFn: () => deletePost(id),
         onSuccess: () => {
-            router.push('/');
+            router.push('/post');
             toast.info('포스트가 삭제되었습니다.');
         },
         onError: (error) => {
