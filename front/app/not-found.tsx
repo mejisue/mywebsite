@@ -1,14 +1,13 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect } from 'react';
 import Image from 'next/image';
+import { Metadata } from 'next';
 
-export default function PostError({ error }: { error: Error; reset: () => void }) {
-    useEffect(() => {
-        console.error(error.message);
-    }, [error]);
+export const metadata: Metadata = {
+    title: '페이지를 찾을 수 없습니다',
+    description: '요청하신 페이지가 존재하지 않습니다.',
+};
 
+export default function NotFound() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-white">
             <Image src="/404.png" alt="empty" width={400} height={100} />
@@ -17,7 +16,7 @@ export default function PostError({ error }: { error: Error; reset: () => void }
 
             <Link
                 href="/"
-                className="rounded-lg bg-blue-300 px-10 py-3 text-base font-medium text-white transition-colors hover:bg-emerald-600"
+                className="rounded-lg bg-blue-300 px-10 py-3 text-base font-medium text-white transition-colors hover:bg-blue-600"
             >
                 홈으로
             </Link>

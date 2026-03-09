@@ -4,7 +4,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getPost, updatePost } from '@/lib/api/posts';
-import { useRouter } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import PostEditor from '../_components/PostEditor';
 
 export default function AdminEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +14,10 @@ export default function AdminEditPage({ params }: { params: Promise<{ id: string
     const { data: post, isLoading } = useQuery({
         queryKey: ['post', id],
         queryFn: () => getPost(id),
+        retry: false,
+        throwOnError: () => {
+            notFound();
+        },
     });
 
     const { mutate: editPost, isPending } = useMutation({
