@@ -3,6 +3,7 @@ package mejisue.mywebsite.post.service;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.PostPageResponse;
 import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -90,6 +93,72 @@ class PostServiceTest {
         assertThatThrownBy(() -> postService.getPost(99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("게시물을 찾을 수 없습니다");
+    }
+
+    @Test
+    void 게시물_페이지_조회_성공() {
+        // given
+        Post post1 = new Post();
+        post1.setTitle("제목1");
+        post1.setTags(List.of("java"));
+
+        Post post2 = new Post();
+        post2.setTitle("제목2");
+        post2.setTags(List.of("spring"));
+
+        // 총 2개, size=10 → hasNext=false
+        given(postRepository.findAll(any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(post1, post2)));
+
+        // when
+        PostPageResponse result = postService.getPostsPage(0, 10);
+
+        // then
+        assertThat(result.content()).hasSize(2);
+        assertThat(result.page()).isEqualTo(0);
+        assertThat(result.size()).isEqualTo(10);
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.content().get(0).title()).isEqualTo("제목1");
+    }
+
+    @Test
+    void 게시물_페이지_조회_다음_페이지_존재() {
+        // given: 전체 3개 중 size=2 첫 페이지 → hasNext=true
+        Post post1 = new Post();
+        post1.setTitle("제목1");
+        post1.setTags(List.of());
+
+        Post post2 = new Post();
+        post2.setTitle("제목2");
+        post2.setTags(List.of());
+
+        Post post3 = new Post();
+        post3.setTitle("제목3");
+        post3.setTags(List.of());
+
+        PageImpl<Post> page = new PageImpl<>(List.of(post1, post2), Pageable.ofSize(2), 3);
+        given(postRepository.findAll(any(Pageable.class))).willReturn(page);
+
+        // when
+        PostPageResponse result = postService.getPostsPage(0, 2);
+
+        // then
+        assertThat(result.content()).hasSize(2);
+        assertThat(result.hasNext()).isTrue();
+    }
+
+    @Test
+    void 게시물_페이지_조회_빈_결과() {
+        // given
+        given(postRepository.findAll(any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of()));
+
+        // when
+        PostPageResponse result = postService.getPostsPage(0, 10);
+
+        // then
+        assertThat(result.content()).isEmpty();
+        assertThat(result.hasNext()).isFalse();
     }
 
     @Test
