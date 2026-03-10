@@ -26,10 +26,34 @@ export type Post = {
     createdAt: string;
 };
 
+export type PostPage = {
+    content: PostSummary[];
+    page: number;
+    size: number;
+    hasNext: boolean;
+};
+
 export async function getPosts(): Promise<PostSummary[]> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts`, {
         cache: 'no-store',
     });
+    if (!res.ok) {
+        throw new Error('게시물 목록을 불러오는데 실패했습니다.');
+    }
+    const data: PostPage = await res.json();
+    return data.content;
+}
+
+export async function getPostsPage(page: number, size = 10): Promise<PostPage> {
+    if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+        const { getMockPostsPage } = await import('./mocks/posts');
+        return getMockPostsPage(page, size);
+    }
+
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts?page=${page}&size=${size}`,
+        { cache: 'no-store' }
+    );
     if (!res.ok) {
         throw new Error('게시물 목록을 불러오는데 실패했습니다.');
     }
