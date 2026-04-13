@@ -12,6 +12,8 @@ aws:
     domain: ${AWS_CLOUDFRONT_DOMAIN}
 
 spring:
+  profiles:
+    active: local
   # 데이터베이스 연결 설정
   datasource:
     url: jdbc:mysql://localhost:3306/my_website?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
