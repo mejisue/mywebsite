@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  lint-and-build:
-    name: Lint & Build Check
+  lint-and-typecheck:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -41,14 +41,4 @@ jobs:
         working-directory: front
         run: pnpm tsc --noEmit
 
-      - name: Build
-        working-directory: front
-        run: pnpm build
-        env:
-          # 빌드 시 필요한 환경변수 (값은 GitHub Secrets에 등록)
-          NEXT_PUBLIC_API_SERVER_URL: ${{ secrets.NEXT_PUBLIC_API_SERVER_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-          GITHUB_ID: ${{ secrets.OAUTH_GITHUB_ID }}
-          GITHUB_SECRET: ${{ secrets.OAUTH_GITHUB_SECRET }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      # 빌드는 Vercel이 담당 — 환경변수를 GitHub Secrets에 따로 등록할 필요 없음
