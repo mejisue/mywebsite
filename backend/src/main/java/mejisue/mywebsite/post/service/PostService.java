@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
+import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,15 @@ public class PostService {
         post.setTags(request.tags());
         post.setImages(extractImages(request.content()));
         return postRepository.save(post);
+    }
+
+    /**
+     * 조회 전용임(readOnly = true), DB 성능 최적화
+     */
+    @Transactional(readOnly = true)
+    public Post getPost(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. id=" + id));
     }
 
     @Transactional
@@ -64,5 +74,20 @@ public class PostService {
         }
 
         return images;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostSummaryResponse> getAllPosts() {
+        return postRepository.findAll().stream()
+                .map(PostSummaryResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public void deletePost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new IllegalArgumentException("게시물을 찾을 수 없습니다. id=" + id);
+        }
+        postRepository.deleteById(id);
     }
 }

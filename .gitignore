@@ -1,0 +1,21 @@
+node_modules/
+package-lock.json
+/package.json
+
+# 환경 변수 (절대 커밋 금지)
+.env
+.env.*
+!.env.*.example
+
+# MySQL 데이터
+backend/mysql_data/
+
+# IntelliJ / IDE
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Backend build output
+backend/build/
