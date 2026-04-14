@@ -63,10 +63,10 @@ jobs:
             cd ~/mywebsite
 
             # 최신 이미지 pull
-            docker compose -f compose.prod.yaml pull app
+            docker compose --env-file .env.prod -f compose.prod.yaml pull app
 
             # 재시작 (mysql은 유지)
-            docker compose -f compose.prod.yaml up -d --no-deps app
+            docker compose --env-file .env.prod -f compose.prod.yaml up -d --no-deps app
 
             # 오래된 이미지 정리
             docker image prune -f
