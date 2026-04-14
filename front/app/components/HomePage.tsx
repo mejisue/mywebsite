@@ -204,11 +204,8 @@ function SpeechBubble({ label, desc }: { label: string; desc?: string }) {
 
 /* ─────────────────── Main Component ─────────────────── */
 export default function HomePage({ posts }: { posts: PostSummary[] }) {
-  // null = SSR 구간 (sessionStorage 접근 불가)
-  const [phase, setPhase] = useState<Phase | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem('hasSeenIntro') ? 'room' : 'door';
-  });
+  // null = 아직 sessionStorage 확인 전 (hydration 전)
+  const [phase, setPhase] = useState<Phase | null>(null);
   const [progress, setProgress] = useState(0);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -218,6 +215,13 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   const doorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // 첫 로드 / 강력 새로고침에만 도어씬 표시
+  // sessionStorage는 탭이 닫히거나 강력 새로고침 시 초기화됨
+  useEffect(() => {
+    const seen = sessionStorage.getItem('hasSeenIntro');
+    setPhase(seen ? 'room' : 'door');
+  }, []);
 
   // Cleanup
   useEffect(() => {
