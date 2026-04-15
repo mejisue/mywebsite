@@ -1,41 +1,12 @@
 services:
-  mysql:
-    image: 'mysql:8.0'
-    container_name: mywebsite-mysql
-    env_file:
-      - .env.prod
-    environment:
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
   app:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/mywebsite-backend:latest
     container_name: mywebsite-app
     env_file:
       - .env.prod
+    environment:
+      - DB_HOST=172.17.0.1  # EC2 호스트 IP — shared-mysql(sleact compose)에 접근
+      - DB_PORT=3306
     ports:
-      - "8080:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - app-network
+      - "8082:8080"
     restart: unless-stopped
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
