@@ -2,12 +2,19 @@ import { getPost } from '@/lib/api/posts';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DeletePostButton from './_components/DeletePostButton';
 import { formatTimeAgo } from '@/lib/time';
 import { notFound } from 'next/navigation';
+import { preload } from 'react-dom';
+
+function extractFirstImageUrl(markdown: string): string | null {
+    const match = markdown.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
+    return match ? match[1] : null;
+}
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -21,6 +28,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
     const session = await getServerSession(authOptions);
     const isAdmin = session?.user?.email === process.env.ADMIN_EMAIL;
+    const firstImageUrl = extractFirstImageUrl(post.content);
+    if (firstImageUrl) preload(firstImageUrl, { as: 'image', fetchPriority: 'high' });
 
     return (
         <div className="flex min-h-screen justify-center bg-white">
@@ -53,9 +62,19 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                         urlTransform={(url) => url}
                         components={{
                             img: (props) => {
-                                if (!props.src) return null;
-                                // eslint-disable-next-line @next/next/no-img-element
-                                return <img {...props} alt={props.alt ?? '이미지'} />;
+                                if (!props.src || typeof props.src !== 'string') return null;
+                                return (
+                                    <span style={{ display: 'block', position: 'relative', width: '100%' }}>
+                                        <Image
+                                            src={props.src}
+                                            alt={props.alt ?? '이미지'}
+                                            width={800}
+                                            height={600}
+                                            style={{ width: '100%', height: 'auto' }}
+                                            priority
+                                        />
+                                    </span>
+                                );
                             },
                         }}
                     >
