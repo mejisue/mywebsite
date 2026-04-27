@@ -42,8 +42,8 @@ const INTERACTIVE_ITEMS = [
   {
     id: 'project3',
     emoji: '🧵',
-    label: 'Thread SNS',
-    desc: '스레드형 SNS 풀스택 구현',
+    label: 'Retweet',
+    desc: '스레드형 SNS',
     href: 'https://retweet.mejisue.site',
     external: false,
     pos: { position: 'absolute', top: '15%', left: '40%' } as React.CSSProperties,
