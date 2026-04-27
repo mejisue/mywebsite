@@ -21,8 +21,8 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Jisue Kim — Frontend Developer",
-  description: "Frontend developer building web apps with Next.js and Spring Boot.",
+  title: "Jisue Kim — FullStack Developer",
+  description: "FullStack developer building web apps with Next.js and Spring Boot.",
 };
 
 export default function RootLayout({
