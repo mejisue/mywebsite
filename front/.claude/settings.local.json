@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/soo/Documents/myWebsite/**)",
+      "Read(//Users/soo/Documents/myWebsite/backend/**)",
+      "Bash(cat /Users/soo/Documents/myWebsite/backend/src/main/resources/application*.properties)",
+      "Bash(cat /Users/soo/Documents/myWebsite/backend/src/main/resources/application*.yml)",
+      "Read(//Users/soo/Documents/sleact/backend/**)",
+      "Read(//Users/soo/Documents/sleact/front/**)",
+      "Bash(gh api:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(gh run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m 'feat : Vercel 프론트 배포 전환 및 GitHub Actions 백엔드 파이프라인 정리:*)"
+    ]
+  }
+}

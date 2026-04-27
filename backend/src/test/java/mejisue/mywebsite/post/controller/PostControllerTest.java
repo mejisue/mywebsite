@@ -81,7 +81,7 @@ class PostControllerTest {
     }
 
     @Test
-    void 게시물_페이지_조회_성공() throws Exception {
+    void 게시물_전체_조회_성공() throws Exception {
         // given: 게시물 2개 생성
         for (int i = 1; i <= 2; i++) {
             mockMvc.perform(post("/api/posts")
@@ -94,32 +94,10 @@ class PostControllerTest {
         // when & then
         mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.page").value(0))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.content[0].title").exists())
-                .andExpect(jsonPath("$.content[0].content").doesNotExist()); // content 필드는 포함되지 않아야 함
-    }
-
-    @Test
-    void 게시물_페이지_커스텀_파라미터_조회() throws Exception {
-        // given: 게시물 3개 생성
-        for (int i = 1; i <= 3; i++) {
-            mockMvc.perform(post("/api/posts")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(
-                                    new CreatePostRequest("제목" + i, "내용" + i, List.of("tag")))))
-                    .andExpect(status().isOk());
-        }
-
-        // when & then: size=2로 첫 페이지 조회 → hasNext=true
-        mockMvc.perform(get("/api/posts").param("page", "0").param("size", "2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.page").value(0))
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.hasNext").value(true));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].title").exists())
+                .andExpect(jsonPath("$[0].content").doesNotExist()) // content는 포함되지 않아야 함
+                .andExpect(jsonPath("$[0].thumbnail").doesNotExist());
     }
 
     @Test

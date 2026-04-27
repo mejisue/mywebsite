@@ -4,14 +4,10 @@ import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.domain.PostImage;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
-import mejisue.mywebsite.post.dto.PostPageResponse;
 import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,16 +81,6 @@ public class PostService {
         return postRepository.findAll().stream()
                 .map(PostSummaryResponse::from)
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public PostPageResponse getPostsPage(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Post> postPage = postRepository.findAll(pageable);
-        List<PostSummaryResponse> content = postPage.getContent().stream()
-                .map(PostSummaryResponse::from)
-                .toList();
-        return new PostPageResponse(content, page, size, postPage.hasNext());
     }
 
     @Transactional

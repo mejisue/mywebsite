@@ -3,7 +3,6 @@ package mejisue.mywebsite.post.controller;
 import lombok.RequiredArgsConstructor;
 import mejisue.mywebsite.post.domain.Post;
 import mejisue.mywebsite.post.dto.CreatePostRequest;
-import mejisue.mywebsite.post.dto.PostPageResponse;
 import mejisue.mywebsite.post.dto.PostSummaryResponse;
 import mejisue.mywebsite.post.dto.UpdatePostRequest;
 import mejisue.mywebsite.post.service.PostService;
@@ -25,11 +24,8 @@ public class PostController {
     }
 
     @GetMapping
-    public PostPageResponse getAllPost(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return postService.getPostsPage(page, size);
+    public List<PostSummaryResponse> getAllPost() {
+        return postService.getAllPosts();
     }
 
     @PostMapping
