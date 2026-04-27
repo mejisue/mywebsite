@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PostSummary } from '@/lib/api/posts';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type Phase = 'door' | 'loading' | 'room';
 
@@ -16,14 +16,16 @@ type Phase = 'door' | 'loading' | 'room';
 const INTERACTIVE_ITEMS = [
   // ── Portfolio projects ──
   {
-    id: 'laptop',
-    emoji: '💻',
+    id: 'home',
+    emoji: '🏠',
     label: 'My Website',
     desc: 'Next.js + Spring Boot\n풀스택 포트폴리오',
     href: 'https://mejisue.site',
     external: true,
-    pos: { position: 'absolute', bottom: '42%', left: '28%' } as React.CSSProperties,
+    pos: { position: 'absolute', bottom: '30%', left: '28%' } as React.CSSProperties,
     size: '5rem',
+    mobilePos: { position: 'absolute', bottom: '30%', left: '22%' } as React.CSSProperties,
+    mobileSize: '3rem',
   },
   {
     id: 'project2',
@@ -34,6 +36,8 @@ const INTERACTIVE_ITEMS = [
     external: true,
     pos: { position: 'absolute', bottom: '40%', right: '35%' } as React.CSSProperties,
     size: '4rem',
+    mobilePos: { position: 'absolute', bottom: '40%', right: '28%' } as React.CSSProperties,
+    mobileSize: '2.4rem',
   },
   {
     id: 'project3',
@@ -42,8 +46,10 @@ const INTERACTIVE_ITEMS = [
     desc: '스레드형 SNS 풀스택 구현',
     href: 'https://retweet.mejisue.site',
     external: false,
-    pos: { position: 'absolute', top: '28%', left: '42%' } as React.CSSProperties,
+    pos: { position: 'absolute', top: '15%', left: '40%' } as React.CSSProperties,
     size: '3.5rem',
+    mobilePos: { position: 'absolute', top: '23%', left: '42%' } as React.CSSProperties,
+    mobileSize: '2.2rem',
   },
 
   // ── Navigation ──
@@ -54,8 +60,10 @@ const INTERACTIVE_ITEMS = [
     desc: '소스코드 보러가기',
     href: 'https://github.com/mejisue',
     external: true,
-    pos: { position: 'absolute', top: '26%', left: '8%' } as React.CSSProperties,
+    pos: { position: 'absolute', top: '26%', left: '14%' } as React.CSSProperties,
     size: '3.5rem',
+    mobilePos: { position: 'absolute', top: '30%', left: '10%' } as React.CSSProperties,
+    mobileSize: '2.2rem',
   },
   {
     id: 'blog',
@@ -64,20 +72,18 @@ const INTERACTIVE_ITEMS = [
     desc: '공부 기록 보러가기',
     href: '/post',
     external: false,
-    pos: { position: 'absolute', top: '22%', right: '9%' } as React.CSSProperties,
+    pos: { position: 'absolute', bottom: '25%', right: '22%' } as React.CSSProperties,
     size: '3.5rem',
+    mobilePos: { position: 'absolute', bottom: '35%', right: '18%' } as React.CSSProperties,
+    mobileSize: '2.2rem',
   },
 ];
 
 // Decorative items (no interaction)
 const DECO_ITEMS = [
-  { id: 'plant', emoji: '🪴', size: '3.8rem', pos: { position: 'absolute', bottom: '42%', left: '4%' } as React.CSSProperties },
-  { id: 'shelf', emoji: '🗄️', size: '5.5rem', pos: { position: 'absolute', bottom: '42%', left: '18%' } as React.CSSProperties },
-  { id: 'clock', emoji: '⏰', size: '2.6rem', pos: { position: 'absolute', top: '34%', left: '15%' } as React.CSSProperties },
-  { id: 'sofa', emoji: '🛋️', size: '7rem', pos: { position: 'absolute', bottom: '41%', right: '3%' } as React.CSSProperties },
-  { id: 'frame', emoji: '🖼️', size: '3.2rem', pos: { position: 'absolute', top: '27%', right: '15%' } as React.CSSProperties },
-  { id: 'ctrl', emoji: '🎮', size: '2.8rem', pos: { position: 'absolute', bottom: '35%', right: '22%' } as React.CSSProperties },
-  { id: 'flask', emoji: '🧪', size: '3rem', pos: { position: 'absolute', bottom: '35%', left: '23%' } as React.CSSProperties },
+  { id: 'plant', emoji: '🪴', size: '3.8rem', pos: { position: 'absolute', bottom: '42%', left: '4%' } as React.CSSProperties, mobileSize: '2.3rem', mobilePos: { position: 'absolute', bottom: '42%', left: '2%' } as React.CSSProperties },
+  { id: 'sofa', emoji: '🛋️', size: '7rem', pos: { position: 'absolute', bottom: '41%', right: '3%' } as React.CSSProperties, mobileSize: '4.2rem', mobilePos: { position: 'absolute', bottom: '41%', right: '1%' } as React.CSSProperties },
+  { id: 'frame', emoji: '🖼️', size: '3.2rem', pos: { position: 'absolute', top: '27%', right: '15%' } as React.CSSProperties, mobileSize: '2rem', mobilePos: { position: 'absolute', top: '26%', right: '10%' } as React.CSSProperties },
 ];
 
 /* ──────────────── SVG Components ──────────────── */
@@ -86,39 +92,27 @@ function CatBubble() {
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ bottom: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%) rotate(-2deg)', transformOrigin: 'bottom center' }}
+      style={{ bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)', transformOrigin: 'bottom center' }}
     >
-      <div className="relative" style={{ width: '152px', height: '76px' }}>
-        {/* Hand-drawn SVG bubble */}
-        <svg width="152" height="76" viewBox="0 0 152 76" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: 'absolute', top: 0, left: 0 }}>
-          {/* Slightly offset shadow stroke for sketch depth */}
-          <path
-            d="M 15,11 C 42,4 102,5 141,10 C 148,11 153,20 152,45 C 151,60 144,68 131,70 L 89,71 C 83,81 73,85 67,74 L 19,70 C 7,69 1,60 2,43 C 1,22 8,13 15,11 Z"
-            fill="transparent"
-            stroke="#2D2D2D"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            opacity="0.2"
-            transform="translate(1.5, 1.5)"
-          />
-          {/* Main bubble */}
-          <path
-            d="M 13,9 C 40,2 100,4 140,8 C 147,9 151,18 150,43 C 149,58 142,66 130,68 L 88,69 C 82,79 71,83 65,72 L 18,68 C 6,67 0,58 1,41 C 0,20 6,12 13,9 Z"
-            fill="#fffef7"
-            stroke="#2D2D2D"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        </svg>
-        {/* Text */}
-        <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: '10px' }}>
-          <p className="font-bold text-[#2D2D2D]" style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.02em' }}>
-            I&apos;m Jisue!
-          </p>
-        </div>
+      {/* Rounded chat bubble */}
+      <div
+        className="relative px-4 py-2.5 text-center"
+        style={{
+          background: '#fffef7',
+          border: '2.2px solid #2D2D2D',
+          borderRadius: '999px',
+          boxShadow: '2px 2px 0px #2D2D2D',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <p className="font-bold text-[#2D2D2D] leading-snug" style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '0.01em' }}>
+          이모티콘에 커서를 올려보세요!
+        </p>
       </div>
+      {/* Tail */}
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" style={{ marginTop: '-1px' }}>
+        <path d="M 2,0 Q 9,12 16,0" fill="#fffef7" stroke="#2D2D2D" strokeWidth="2.2" strokeLinejoin="round" />
+      </svg>
     </div>
   );
 }
@@ -186,7 +180,7 @@ function SpeechBubble({ label, desc }: { label: string; desc?: string }) {
       <div className="rounded-2xl border-2 border-[#2D2D2D] bg-white px-3 py-2 text-center whitespace-nowrap shadow-md">
         <p className="text-xs font-bold uppercase tracking-wider text-[#2D2D2D]">{label}</p>
         {desc && (
-          <p className="mt-0.5 text-[10px] leading-tight whitespace-pre-line text-neutral-500">{desc}</p>
+          <p className="mt-0.5 text-[10px] leading-tight whitespace-pre-line text-neutral-500" style={{ wordBreak: 'keep-all' }}>{desc}</p>
         )}
       </div>
       {/* Tail */}
@@ -213,6 +207,7 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   const [doorOpen, setDoorOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
 
+  const isMobile = useIsMobile();
   const counterObj = useRef({ val: 0 });
   const gsapAnim = useRef<gsap.core.Tween | null>(null);
   const doorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -270,14 +265,14 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   };
 
   // sessionStorage 확인 전에는 아무것도 렌더하지 않음 (hydration mismatch 방지)
-  if (phase === null) return <div className="min-h-screen" style={{ background: '#fffaf0' }} />;
+  if (phase === null) return <div className="min-h-screen" style={{ background: '#fffaf0', minWidth: '480px' }} />;
 
   /* ══════════════ DOOR SCENE ══════════════ */
   if (phase === 'door' || phase === 'loading') {
     return (
       <div
         className="relative flex min-h-screen select-none flex-col overflow-hidden"
-        style={{ background: '#fffaf0' }}
+        style={{ background: '#fffaf0', minWidth: '480px' }}
       >
         {/* Floor */}
         <div
@@ -348,7 +343,7 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
     <div
       ref={roomRef}
       className="relative min-h-screen overflow-hidden select-none"
-      style={{ background: '#fffaf0' }}
+      style={{ background: '#fffaf0', minWidth: '480px' }}
     >
       {/* Floor */}
       <div
@@ -411,7 +406,7 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
         <div
           key={item.id}
           className="room-el absolute cursor-pointer"
-          style={{ ...item.pos, opacity: 0 }}
+          style={{ ...(isMobile ? item.mobilePos : item.pos), opacity: 0 }}
           onMouseEnter={() => setHovered(item.id)}
           onMouseLeave={() => setHovered(null)}
           onClick={() => navigate(item.href, item.external)}
@@ -422,7 +417,7 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
           <div className="relative flex flex-col items-center">
             {hovered === item.id && <SpeechBubble label={item.label} desc={item.desc} />}
             <span
-              style={{ fontSize: item.size }}
+              style={{ fontSize: isMobile ? item.mobileSize : item.size }}
               className="block leading-none transition-transform duration-150 hover:scale-110"
             >
               {item.emoji}
@@ -436,9 +431,9 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
         <div
           key={item.id}
           className="room-el absolute"
-          style={{ ...item.pos, opacity: 0 }}
+          style={{ ...(isMobile ? item.mobilePos : item.pos), opacity: 0 }}
         >
-          <span style={{ fontSize: item.size }} className="block leading-none">
+          <span style={{ fontSize: isMobile ? item.mobileSize : item.size }} className="block leading-none">
             {item.emoji}
           </span>
         </div>
