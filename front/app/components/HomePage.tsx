@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { useRouter } from 'next/navigation';
 import { PostSummary } from '@/lib/api/posts';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ProjectModal, { ProjectItem } from './ProjectModal';
 
 type Phase = 'door' | 'loading' | 'room';
 
@@ -12,47 +13,93 @@ type Phase = 'door' | 'loading' | 'room';
    Room data — edit these to match your projects
    ──────────────────────────────────────────── */
 
-// Items with hover tooltip + click navigation (portfolio / nav links)
-const INTERACTIVE_ITEMS = [
-  // ── Portfolio projects ──
-  {
-    id: 'home',
-    emoji: '🏠',
-    label: 'My Website',
-    desc: 'Next.js + Spring Boot\n풀스택 포트폴리오',
-    href: 'https://mejisue.site',
-    external: true,
-    pos: { position: 'absolute', bottom: '30%', left: '28%' } as React.CSSProperties,
-    size: '5rem',
-    mobilePos: { position: 'absolute', bottom: '30%', left: '22%' } as React.CSSProperties,
-    mobileSize: '3rem',
-  },
-  {
-    id: 'project2',
-    emoji: '💬',
-    label: 'Sleact',
-    desc: '실시간 채팅 사이트',
-    href: 'https://sleact.mejisue.site',
-    external: true,
-    pos: { position: 'absolute', bottom: '40%', right: '35%' } as React.CSSProperties,
-    size: '4rem',
-    mobilePos: { position: 'absolute', bottom: '40%', right: '28%' } as React.CSSProperties,
-    mobileSize: '2.4rem',
-  },
-  {
-    id: 'project3',
-    emoji: '🧵',
-    label: 'Thread SNS',
-    desc: '스레드형 SNS 풀스택 구현',
-    href: 'https://retweet.mejisue.site',
-    external: false,
-    pos: { position: 'absolute', top: '15%', left: '40%' } as React.CSSProperties,
-    size: '3.5rem',
-    mobilePos: { position: 'absolute', top: '23%', left: '42%' } as React.CSSProperties,
-    mobileSize: '2.2rem',
-  },
+const PROJECT_ITEMS: (ProjectItem & {
+  desc: string;
+  pos: React.CSSProperties;
+  size: string;
+  mobilePos: React.CSSProperties;
+  mobileSize: string;
+})[] = [
+    {
+      id: 'home',
+      emoji: '🏠',
+      label: 'My Website',
+      desc: 'Next.js + Spring Boot\n풀스택 포트폴리오',
+      pos: { position: 'absolute', bottom: '30%', left: '28%' },
+      size: '5rem',
+      mobilePos: { position: 'absolute', bottom: '30%', left: '22%' },
+      mobileSize: '3rem',
+      detail: {
+        description: 'Next.js와 Spring Boot로 구현한 풀스택 포트폴리오 사이트. GSAP 애니메이션 기반 인트로와 블로그 기능 포함.',
+        techStack: ['Next.js', 'TypeScript', 'Spring Boot', 'MySQL', 'Docker', 'AWS EC2'],
+        features: [
+          'GSAP 기반 인트로 애니메이션',
+          '블로그 게시글 CRUD',
+          'Docker Compose 배포',
+          '반응형 UI',
+        ],
+        links: {
+          site: 'https://mejisue.site',
+          github: 'https://github.com/mejisue/mejisue-website',
+        },
+      },
+    },
+    {
+      id: 'project2',
+      emoji: '💬',
+      label: 'Sleact',
+      desc: '실시간 채팅 사이트',
+      pos: { position: 'absolute', bottom: '40%', right: '35%' },
+      size: '4rem',
+      mobilePos: { position: 'absolute', bottom: '40%', right: '28%' },
+      mobileSize: '2.4rem',
+      detail: {
+        description: 'Slack을 클론한 실시간 채팅 웹 애플리케이션.',
+        techStack: ['React', 'TypeScript', 'WebSocket', 'Spring Boot', 'MySQL'],
+        features: [
+          '실시간 채팅 (WebSocket)',
+          '워크스페이스 / 채널 구조',
+          'DM 기능',
+          '멤버 초대 및 관리',
+        ],
+        links: {
+          site: 'https://sleact.mejisue.site',
+          github: 'https://github.com/mejisue/sleact',
+        },
+      },
+    },
+    {
+      id: 'project3',
+      emoji: '🧵',
+      label: 'Retweet',
+      desc: '스레드형 SNS 풀스택 구현',
+      pos: { position: 'absolute', top: '15%', left: '40%' },
+      size: '3.5rem',
+      mobilePos: { position: 'absolute', top: '23%', left: '42%' },
+      mobileSize: '2.2rem',
+      detail: {
+        description: 'Twitter(X) 스타일 스레드형 SNS 풀스택 구현.',
+        techStack: ['Next.js', 'TypeScript', 'Spring Boot', 'MySQL', 'Redis', 'Spring Security'],
+        features: [
+          '게시글 CRUD',
+          '(중첩)댓글 기능',
+          '댓글 좋아요 기능',
+          '무한 스크롤',
+          '이미지 업로드',
+          '프로필 수정 기능',
+          '다크모드 기능',
+          'OAuth2 로그인 기능',
 
-  // ── Navigation ──
+        ],
+        links: {
+          site: 'https://retweet.mejisue.site',
+          github: 'https://github.com/mejisue/retweet',
+        },
+      },
+    },
+  ];
+
+const NAV_ITEMS = [
   {
     id: 'github',
     emoji: '🐙',
@@ -206,6 +253,7 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   const [progress, setProgress] = useState(0);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<typeof PROJECT_ITEMS[number] | null>(null);
 
   const isMobile = useIsMobile();
   const counterObj = useRef({ val: 0 });
@@ -401,8 +449,33 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
         <CatSVG />
       </div>
 
-      {/* ── Interactive items (portfolio + nav links) ── */}
-      {INTERACTIVE_ITEMS.map((item) => (
+      {/* ── Project items (open modal) ── */}
+      {PROJECT_ITEMS.map((item) => (
+        <div
+          key={item.id}
+          className="room-el absolute cursor-pointer"
+          style={{ ...(isMobile ? item.mobilePos : item.pos), opacity: 0 }}
+          onMouseEnter={() => setHovered(item.id)}
+          onMouseLeave={() => setHovered(null)}
+          onClick={() => setSelectedProject(item)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setSelectedProject(item)}
+        >
+          <div className="relative flex flex-col items-center">
+            {hovered === item.id && <SpeechBubble label={item.label} desc={item.desc} />}
+            <span
+              style={{ fontSize: isMobile ? item.mobileSize : item.size }}
+              className="block leading-none transition-transform duration-150 hover:scale-110"
+            >
+              {item.emoji}
+            </span>
+          </div>
+        </div>
+      ))}
+
+      {/* ── Nav items (navigate) ── */}
+      {NAV_ITEMS.map((item) => (
         <div
           key={item.id}
           className="room-el absolute cursor-pointer"
@@ -425,6 +498,12 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
           </div>
         </div>
       ))}
+
+      {/* ── Project Modal ── */}
+      <ProjectModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+      />
 
       {/* ── Decorative items ── */}
       {DECO_ITEMS.map((item) => (
