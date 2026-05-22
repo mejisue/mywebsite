@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PostSummary } from '@/lib/api/posts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ProjectModal, { ProjectItem } from './ProjectModal';
+import SelfIntroModal from './SelfIntroModal';
 
 type Phase = 'door' | 'loading' | 'room';
 
@@ -245,15 +246,13 @@ function SpeechBubble({ label, desc }: { label: string; desc?: string }) {
 
 /* ─────────────────── Main Component ─────────────────── */
 export default function HomePage({ posts }: { posts: PostSummary[] }) {
-  // null = SSR 구간 (sessionStorage 접근 불가)
-  const [phase, setPhase] = useState<Phase | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem('hasSeenIntro') ? 'room' : 'door';
-  });
+  // null = SSR / hydration 구간 — useEffect에서 sessionStorage 읽어 확정
+  const [phase, setPhase] = useState<Phase | null>(null);
   const [progress, setProgress] = useState(0);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<typeof PROJECT_ITEMS[number] | null>(null);
+  const [selfIntroOpen, setSelfIntroOpen] = useState(false);
 
   const isMobile = useIsMobile();
   const counterObj = useRef({ val: 0 });
@@ -261,6 +260,11 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   const doorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // sessionStorage는 클라이언트에서만 읽을 수 있으므로 useEffect에서 초기화
+  useEffect(() => {
+    setPhase(sessionStorage.getItem('hasSeenIntro') ? 'room' : 'door');
+  }, []);
 
   // Cleanup
   useEffect(() => {
@@ -442,8 +446,12 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
 
       {/* ── Cat ── */}
       <div
-        className="room-el cat-char absolute"
+        className="room-el cat-char absolute cursor-pointer"
         style={{ bottom: '42%', left: '50%', transform: 'translateX(-50%)', opacity: 0 }}
+        onClick={() => setSelfIntroOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && setSelfIntroOpen(true)}
       >
         <CatBubble />
         <CatSVG />
@@ -503,6 +511,12 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}
+      />
+
+      {/* ── Self Intro Modal ── */}
+      <SelfIntroModal
+        open={selfIntroOpen}
+        onClose={() => setSelfIntroOpen(false)}
       />
 
       {/* ── Decorative items ── */}
