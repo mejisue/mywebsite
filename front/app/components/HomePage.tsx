@@ -8,7 +8,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ProjectModal, { ProjectItem } from './ProjectModal';
 import SelfIntroModal from './SelfIntroModal';
 
-type Phase = 'door' | 'loading' | 'room';
+type Phase = 'door' | 'room';
+const INTRO_FLOOR_TOP = '59%';
+const INTRO_DOOR_BOTTOM = '41%';
 
 /* ─────────────────────────────────────────────
    Room data — edit these to match your projects
@@ -20,16 +22,18 @@ const PROJECT_ITEMS: (ProjectItem & {
   size: string;
   mobilePos: React.CSSProperties;
   mobileSize: string;
+  image?: string;
 })[] = [
     {
       id: 'home',
       emoji: '🏠',
+      image: '/home.png',
       label: 'My Website',
       desc: 'Next.js + Spring Boot\n풀스택 포트폴리오',
       pos: { position: 'absolute', bottom: '30%', left: '28%' },
-      size: '5rem',
+      size: '7rem',
       mobilePos: { position: 'absolute', bottom: '30%', left: '22%' },
-      mobileSize: '3rem',
+      mobileSize: '5rem',
       detail: {
         description: 'Next.js와 Spring Boot로 구현한 풀스택 포트폴리오 사이트. GSAP 애니메이션 기반 인트로와 블로그 기능 포함.',
         techStack: ['Next.js', 'TypeScript', 'Spring Boot', 'MySQL', 'Docker', 'AWS EC2'],
@@ -49,11 +53,12 @@ const PROJECT_ITEMS: (ProjectItem & {
       id: 'project2',
       emoji: '💬',
       label: 'Sleact',
+      image: '/sleact.png',
       desc: '실시간 채팅 사이트',
-      pos: { position: 'absolute', bottom: '40%', right: '35%' },
-      size: '4rem',
+      pos: { position: 'absolute', bottom: '40%', right: '32%' },
+      size: '6rem',
       mobilePos: { position: 'absolute', bottom: '40%', right: '28%' },
-      mobileSize: '2.4rem',
+      mobileSize: '5rem',
       detail: {
         description: 'Slack을 클론한 실시간 채팅 웹 애플리케이션.',
         techStack: ['React', 'TypeScript', 'WebSocket', 'Spring Boot', 'MySQL'],
@@ -74,10 +79,11 @@ const PROJECT_ITEMS: (ProjectItem & {
       emoji: '🧵',
       label: 'Retweet',
       desc: '스레드형 SNS 풀스택 구현',
+      image: '/retweet.png',
       pos: { position: 'absolute', top: '15%', left: '40%' },
-      size: '3.5rem',
+      size: '6rem',
       mobilePos: { position: 'absolute', top: '23%', left: '42%' },
-      mobileSize: '2.2rem',
+      mobileSize: '5rem',
       detail: {
         description: 'Twitter(X) 스타일 스레드형 SNS 풀스택 구현.',
         techStack: ['Next.js', 'TypeScript', 'Spring Boot', 'MySQL', 'Redis', 'Spring Security'],
@@ -118,12 +124,13 @@ const NAV_ITEMS = [
     emoji: '📒',
     label: 'Blog',
     desc: '공부 기록 보러가기',
+    image: '/blog.png',
     href: '/post',
     external: false,
     pos: { position: 'absolute', bottom: '25%', right: '22%' } as React.CSSProperties,
-    size: '3.5rem',
-    mobilePos: { position: 'absolute', bottom: '35%', right: '18%' } as React.CSSProperties,
-    mobileSize: '2.2rem',
+    size: '6rem',
+    mobilePos: { position: 'absolute', bottom: '28%', right: '13%' } as React.CSSProperties,
+    mobileSize: '3.5rem',
   },
 ];
 
@@ -154,7 +161,7 @@ function CatBubble() {
         }}
       >
         <p className="font-bold text-[#2D2D2D] leading-snug" style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '0.01em' }}>
-          이모티콘에 커서를 올려보세요!
+          이모티콘에 커서를 올려보세요! <br /> 저를 누르시면 자기소개가 나와요.
         </p>
       </div>
       {/* Tail */}
@@ -176,48 +183,155 @@ function CatSVG() {
   );
 }
 
-function DoorSVG() {
+function DoorSVG({ open = false, onOpen }: { open?: boolean; onOpen?: () => void }) {
   return (
-    <svg
-      viewBox="0 0 200 340"
-      className="w-36 h-60 md:w-44 md:h-72 lg:w-52 lg:h-[330px]"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      className="relative w-36 md:w-44 lg:w-52"
+      style={{ aspectRatio: '129/178', perspective: '900px' }}
     >
-      {/* Door body */}
-      <rect x="3" y="3" width="194" height="334" rx="5" fill="#A07830" stroke="#2D2D2D" strokeWidth="3.5" />
-      {/* Upper panel */}
-      <rect x="22" y="22" width="156" height="112" rx="4" fill="#8C6520" stroke="#2D2D2D" strokeWidth="2" />
-      {/* Lower panel */}
-      <rect x="22" y="148" width="156" height="172" rx="4" fill="#8C6520" stroke="#2D2D2D" strokeWidth="2" />
-      {/* Mail slot */}
-      <rect x="68" y="88" width="64" height="16" rx="3" fill="#7A5618" stroke="#2D2D2D" strokeWidth="2" />
-      {/* Peephole */}
-      <circle cx="100" cy="52" r="8" fill="#2D2D2D" />
-      <circle cx="100" cy="52" r="4" fill="#555" />
-      {/* Handle */}
-      <rect x="148" y="192" width="26" height="11" rx="5.5" fill="#BBB" stroke="#888" strokeWidth="1.5" />
-      <rect x="158" y="198" width="10" height="26" rx="5" fill="#BBB" stroke="#888" strokeWidth="1.5" />
-      {/* Hinges */}
-      <rect x="10" y="38" width="13" height="26" rx="3" fill="#AAA" stroke="#888" strokeWidth="1.5" />
-      <rect x="10" y="258" width="13" height="26" rx="3" fill="#AAA" stroke="#888" strokeWidth="1.5" />
-    </svg>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute"
+        style={{
+          left: '10.8%',
+          right: '6%',
+          bottom: '-2px',
+          height: '7px',
+          background: '#050505',
+          borderRadius: '999px',
+          zIndex: 6,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute"
+        style={{
+          right: '8.6%',
+          bottom: '-2px',
+          width: '5px',
+          height: '18px',
+          background: '#050505',
+          borderRadius: '999px',
+          zIndex: 7,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute overflow-hidden"
+        style={{
+          left: '13%',
+          right: '9.5%',
+          top: '2%',
+          bottom: '1%',
+          background: '#2D2723',
+          border: '2px solid #050505',
+          borderRadius: '2px',
+          zIndex: 5,
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, #443B35 0%, #312B27 56%, #1E1A18 100%)',
+          }}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0"
+          style={{
+            height: '32%',
+            background: '#5E524A',
+            borderTop: '2px solid #050505',
+          }}
+        />
+        <div
+          className="absolute"
+          style={{
+            left: '18%',
+            top: '18%',
+            width: '27%',
+            height: '14%',
+            background: '#FFF2B8',
+            border: '2px solid #050505',
+            borderRadius: '3px',
+            boxShadow: '0 0 18px rgba(255, 221, 127, 0.35)',
+          }}
+        />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute"
+        style={{
+          right: '9.5%',
+          top: '2%',
+          bottom: '1%',
+          width: '3px',
+          background: '#050505',
+          borderRadius: '999px',
+          zIndex: 15,
+        }}
+      />
+      {/* 문틀 — 고정 */}
+      <svg
+        viewBox="0 10 129 178"
+        className="absolute inset-0 z-10 h-full w-full"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <style>{`.fr0{fill:#FFFAF0}`}</style>
+        <path className="fr0" d="m129.3 34.2v-34.2h-128.4v185l4.4 1h8.7l0.6-173.2 1.7-0.3h98.3l0.6 0.5 0.3 2.2 0.4 171 6.9 1.3 6.5-0.2v-151c-0.6-0.6-0.6-4 0-4.9v2.8z" />
+      </svg>
+
+      {/* 문짝 — rotateY로 회전 (경첩 x=14.4 → 11.16%) */}
+      <button
+        type="button"
+        onClick={onOpen}
+        className="absolute inset-0 z-20 h-full w-full focus:outline-none"
+        style={{
+          transformOrigin: '11.16% center',
+          transform: open ? 'rotateY(-74deg)' : 'rotateY(0deg)',
+          transformStyle: 'preserve-3d',
+          transition: 'transform 950ms cubic-bezier(0.2, 0.9, 0.2, 1)',
+          cursor: open ? 'default' : 'pointer',
+        }}
+        aria-label="Enter"
+        disabled={open}
+      >
+        <svg
+          viewBox="0 10 129 178"
+          className="h-full w-full"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <style>{`
+            .d1{fill:#A18977}
+            .d4{fill:none;stroke:#050505;stroke-width:2.6;stroke-linejoin:round;stroke-miterlimit:10}
+            .d5{fill:none;stroke:#877667;stroke-width:2.1;stroke-linejoin:round;stroke-miterlimit:10}
+            .d6{fill:#B3B3B3;stroke:#050505;stroke-width:2.6;stroke-linejoin:round;stroke-miterlimit:10}
+            .d7{fill:#CBCBCB;stroke:#050505;stroke-width:2.1;stroke-linejoin:round;stroke-miterlimit:10}
+            .d8{fill:#B3B3B3;stroke:#050505;stroke-width:2.6;stroke-miterlimit:10}
+            .d9{fill:#CBCBCB;stroke:#050505;stroke-width:2.1;stroke-miterlimit:10}
+          `}</style>
+          <path className="d1" d="m14.4 12.5v173.7h101.1v-173.2l-10.1-0.8-13.5 0.6-13.2-0.3-24.7 0.3-5.1 0.4-14.7-0.2h-8.5l-5.5-0.5z" />
+          <path className="d4" d="m14.4 12.5h5.1l6.2 0.5 5-0.1 4.9 0.3 4.8-0.2 8.6 0.2 4.4-0.6 4.6-0.1 5.8-0.1 3.4 0.1h10.6l2.1-0.1 5.8 0.3 6.5 0.3h0.5l4.7-0.7 2.1-0.2h6.4 0.7 1.1l2.2 0.4 1.5-0.1 1-0.1 2.5 0.3 0.3 0.2h0.2l-0.2 0.5v5.8l0.4 2.4v9.4l-0.2 1.8 0.1 1.5-0.1 2.1 0.1 1.4-0.1 6.2-0.1 3.7 0.2 11.3-0.1 23.2v14.8l0.3 2.1-0.2 14.1-0.3 4.3v68.4" />
+          <path className="d4" d="m14.4 12.5 0.2 1.1v3.4l-0.2 2.3 0.3 1.4-0.2 3 0.1 6.3 0.4 155.6" />
+          <path className="d4" d="m15 185.8h100.2" />
+          <path className="d5" d="m25.6 24.2 4-0.1 3.8 0.4h4.3l3.7 0.2 4.6-0.2 7.1 0.3 3.3-0.5 6.3-0.2 7.6 0.2 6.8-0.2 8.7 0.5 5.4-0.5 4.1-0.2 7.2 0.2 0.5 0.1h0.6l0.5 0.1 0.3 0.1 0.4 0.1-0.6 0.1-0.2 0.1h0.5l-0.9-0.2 0.3 0.2 0.3-0.2 0.3-0.1-0.9 0.2 0.3 0.1 0.3-0.2h0.6l-1.2 0.2 1.2-0.1-0.3 0.1 0.3 0.1-0.3-0.1-0.3-0.2h0.3l0.3 0.1-0.3 0.1-0.3-0.2 0.3 0.2 0.3-0.1-0.3 0.1 0.3 0.1-0.3-0.1 0.2 0.1 0.1-0.2" />
+          <path className="d5" d="m25.6 24.1-0.4 0.4h0.4l-0.4 0.3 0.4-0.2-0.4 0.2 0.4-0.1-0.4 0.1 0.4 0.1-0.4 0.1 0.4-0.1-0.4 0.1 0.4-0.1-0.4 0.1 0.4 0.1-0.4 0.1 0.4-0.1-0.4 0.1 0.4 0.1-0.4 0.2 0.4-0.2-0.4 0.2 0.4-0.1-0.4 0.1 0.4 0.1-0.4 0.1 0.4-0.1-0.4 3.1 0.2 2.2-0.1 4.4-0.3 9.4v3.3l0.2 3.7-0.2 3.3 0.2 2.5-0.2 6.2-0.3 3.8v15.1l0.4 8.3-0.4 7.9v13.8l0.5 8.9 0.4 14.7-0.4 13.1-0.4 19.8 0.5 6.9 4.3-0.2 5.7 0.8 13.6-0.5 3.1 0.2 2.5-0.4 7.2-0.1 3.6 0.5 12.8-0.5 2.5 0.1 2.9-0.4 8 0.5 5.2 0.1 0.9-0.1-0.5-0.1h1.5l3.3 0.4h1.4l-0.3 0.1 0.9-0.1h-1.1l0.2 0.1 0.9-0.1-0.3 0.1 0.6-0.1-0.6 0.1 0.9-0.1-0.3 0.1 0.6-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.2-0.3 0.2 0.3-0.2-0.3 0.2 0.3-0.2-0.3 0.2 0.3-0.2-0.3-0.1 0.3 0.1-0.3-0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3 0.1 0.3-0.1-0.3-0.1 0.3 0.1-0.6-0.2 0.6 0.2-0.3-0.1 0.3-0.2-0.3 0.2 0.3-0.2-0.3-0.1 0.3 0.1-0.3-0.1 0.3-0.1-0.3 0.1 0.3-0.1 0.3-2.1v-8.9l0.2-2.8-0.3-20.3v-1.5l0.1-0.5v-12.3l-0.9-13 0.5-5.1-0.2-9.7-0.3-1.2v-30.5l0.2-2-0.2-8.7 0.3-11 0.2-7.3-0.2-11.5" />
+          <path className="d6" d="m11 28.4-1.1 0.6-0.6 0.9 1.3-0.1-1.3 0.6v16.1l1 0.9 1.7 0.4 3.1-0.5 1.4-1.3v-15.8l-0.9-1.6-1.9-0.4z" />
+          <path className="d6" d="m11 145.6-0.5 1.2v15.7l2 1.5 3.1-0.5 0.9-1.1 0.2-14.8-0.5-2-0.9-0.9h-2.6z" />
+          <path className="d7" d="m52.4 40.3-0.6 0.1-0.4 0.7 0.2 0.5-0.1 4.4 0.6 0.7h14.6l7-0.3 0.6-0.5 0.3-2.4-0.3-3.1-0.7-0.4h-9.7z" />
+          <path className="d9" d="m61.4 60.3-0.7 2.3 0.7 1.6 1.9 0.5 1.2-0.4 0.8-1 0.1-1.5-0.6-1.3-1.5-0.5z" />
+          <path className="d8" d="m83.6 101.5v27.4l0.3 4.3h15.1l0.2-32.4-11.6-0.2z" />
+          <path className="d6" d="m88 124.5 1.1 2.5 2 1 2.4 0.1 2.3-1.5 11.4 0.5v-4.5l-11.2-0.4-3.3-0.8-2.6 0.7z" />
+          <path className="d9" d="m95.7 122.7-2-1.1-2.3 0.4-1.3 1.2-0.7 1.4 0.5 1.9 1.4 1.4 1.8 0.4 1.8-0.4 1.2-1.3 0.5-2z" />
+          <path className="d9" d="m95.9 122.6h11l0.3 4.4-11.6-0.2z" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
-function KeypadSVG() {
-  return (
-    <svg viewBox="0 0 58 88" className="w-10 h-16 md:w-12 md:h-20" fill="none">
-      <rect x="2" y="2" width="54" height="84" rx="8" fill="#D0D8E0" stroke="#2D2D2D" strokeWidth="2.5" />
-      <rect x="10" y="12" width="38" height="22" rx="4" fill="#1A2340" stroke="#2D2D2D" strokeWidth="1.5" />
-      {[0, 1, 2].flatMap(row =>
-        [0, 1, 2].map(col => (
-          <rect key={`${row}-${col}`} x={10 + col * 13} y={46 + row * 13} width="9" height="9" rx="2" fill="#AAB8C0" stroke="#2D2D2D" strokeWidth="1" />
-        ))
-      )}
-    </svg>
-  );
-}
+
 
 function SpeechBubble({ label, desc }: { label: string; desc?: string }) {
   return (
@@ -248,28 +362,25 @@ function SpeechBubble({ label, desc }: { label: string; desc?: string }) {
 export default function HomePage({ posts }: { posts: PostSummary[] }) {
   // null = SSR / hydration 구간 — useEffect에서 sessionStorage 읽어 확정
   const [phase, setPhase] = useState<Phase | null>(null);
-  const [progress, setProgress] = useState(0);
   const [doorOpen, setDoorOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<typeof PROJECT_ITEMS[number] | null>(null);
   const [selfIntroOpen, setSelfIntroOpen] = useState(false);
 
   const isMobile = useIsMobile();
-  const counterObj = useRef({ val: 0 });
-  const gsapAnim = useRef<gsap.core.Tween | null>(null);
   const doorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // sessionStorage는 클라이언트에서만 읽을 수 있으므로 useEffect에서 초기화
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhase(sessionStorage.getItem('hasSeenIntro') ? 'room' : 'door');
   }, []);
 
   // Cleanup
   useEffect(() => {
     return () => {
-      gsapAnim.current?.kill();
       if (doorTimer.current) clearTimeout(doorTimer.current);
     };
   }, []);
@@ -297,18 +408,8 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
 
   const handleDoorClick = () => {
     if (phase !== 'door') return;
-    setPhase('loading');
-    counterObj.current.val = 0;
-
-    gsapAnim.current = gsap.to(counterObj.current, {
-      val: 100,
-      duration: 2.8,
-      ease: 'power1.inOut',
-      onUpdate: () => setProgress(Math.round(counterObj.current.val)),
-      onComplete: enterRoom,
-    });
-
-    doorTimer.current = setTimeout(() => setDoorOpen(true), 1400);
+    setDoorOpen(true);
+    doorTimer.current = setTimeout(enterRoom, 1050);
   };
 
   const navigate = (href: string, external: boolean) => {
@@ -320,69 +421,48 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
   if (phase === null) return <div className="min-h-screen" style={{ background: '#fffaf0', minWidth: '480px' }} />;
 
   /* ══════════════ DOOR SCENE ══════════════ */
-  if (phase === 'door' || phase === 'loading') {
+  if (phase === 'door') {
     return (
       <div
         className="relative flex min-h-screen select-none flex-col overflow-hidden"
         style={{ background: '#fffaf0', minWidth: '480px' }}
       >
         {/* Floor */}
-        <div
-          className="absolute inset-x-0 bottom-0"
-          style={{
-            top: '62%',
-            background: '#C2C8D0',
-            backgroundImage:
-              'repeating-linear-gradient(90deg,rgba(255,255,255,0.22) 0,rgba(255,255,255,0.22) 1px,transparent 1px,transparent 70px),' +
-              'repeating-linear-gradient(0deg,rgba(255,255,255,0.22) 0,rgba(255,255,255,0.22) 1px,transparent 1px,transparent 70px)',
-          }}
-        />
-        {/* Ground line */}
-        <div className="absolute inset-x-0" style={{ top: '62%', height: '2.5px', background: '#2D2D2D' }} />
+        <div className="absolute inset-x-0 bottom-0 overflow-hidden" style={{ top: INTRO_FLOOR_TOP, background: '#A5A9AF' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/intro_bottom_pc.svg" alt="" aria-hidden="true" className="h-full w-full" style={{ objectFit: 'cover', objectPosition: 'top center' }} />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0"
+            style={{
+              height: '3px',
+              background: '#050505',
+              borderRadius: '999px',
+              boxShadow: '0 1px 0 #050505',
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-0 top-0"
+            style={{
+              width: '3px',
+              height: '18px',
+              background: '#050505',
+              borderRadius: '999px',
+            }}
+          />
+        </div>
 
         {/* Door area */}
-        <div className="absolute inset-x-0 flex flex-col items-center justify-end" style={{ top: '8%', bottom: '38%' }}>
-          {/* Progress counter */}
-          <p
-            className="mb-6 font-bold tracking-widest text-[#2D2D2D]"
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 2.5vw, 1.6rem)' }}
-          >
-            {progress} %
-          </p>
+        <div className="absolute inset-x-0 flex flex-col items-center justify-end" style={{ top: '8%', bottom: INTRO_DOOR_BOTTOM }}>
+          {/* Door */}
+          <div className="flex translate-y-px items-end gap-4 md:gap-6">
+            <DoorSVG open={doorOpen} onOpen={handleDoorClick} />
 
-          {/* Door + keypad row */}
-          <div className="flex items-end gap-4 md:gap-6">
-            <div style={{ perspective: '700px' }}>
-              <div
-                style={{
-                  transformOrigin: 'left 50%',
-                  transform: doorOpen ? 'rotateY(-78deg)' : 'rotateY(0deg)',
-                  transition: 'transform 1.2s cubic-bezier(0.4,0,0.2,1)',
-                  cursor: phase === 'door' ? 'pointer' : 'default',
-                }}
-                onClick={handleDoorClick}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handleDoorClick()}
-                aria-label="Enter"
-              >
-                <DoorSVG />
-              </div>
-            </div>
 
-            {/* Keypad + CLICK! annotation */}
-            <div className="flex flex-col items-start gap-2 pb-3">
-              {phase === 'door' && (
-                <div className="mb-1 flex items-center gap-1.5 text-[#2D2D2D]">
-                  <svg width="16" height="20" viewBox="0 0 18 22" fill="none">
-                    <path d="M3 2 L15 11 L9 13 L12 20 L8 22 L5 15 L1 18 Z" fill="white" stroke="#2D2D2D" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                  <span className="text-xs font-bold tracking-widest" style={{ fontFamily: 'var(--font-display)' }}>
-                    CLICK!
-                  </span>
-                </div>
-              )}
-              <KeypadSVG />
+            <div className="flex flex-col items-start gap-2">
+
+
             </div>
           </div>
         </div>
@@ -472,12 +552,22 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
         >
           <div className="relative flex flex-col items-center">
             {hovered === item.id && <SpeechBubble label={item.label} desc={item.desc} />}
-            <span
-              style={{ fontSize: isMobile ? item.mobileSize : item.size }}
-              className="block leading-none transition-transform duration-150 hover:scale-110"
-            >
-              {item.emoji}
-            </span>
+            {item.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.image}
+                alt={item.label}
+                style={{ width: isMobile ? item.mobileSize : item.size, height: isMobile ? item.mobileSize : item.size }}
+                className="block object-contain transition-transform duration-150 hover:scale-110"
+              />
+            ) : (
+              <span
+                style={{ fontSize: isMobile ? item.mobileSize : item.size }}
+                className="block leading-none transition-transform duration-150 hover:scale-110"
+              >
+                {item.emoji}
+              </span>
+            )}
           </div>
         </div>
       ))}
@@ -497,12 +587,22 @@ export default function HomePage({ posts }: { posts: PostSummary[] }) {
         >
           <div className="relative flex flex-col items-center">
             {hovered === item.id && <SpeechBubble label={item.label} desc={item.desc} />}
-            <span
-              style={{ fontSize: isMobile ? item.mobileSize : item.size }}
-              className="block leading-none transition-transform duration-150 hover:scale-110"
-            >
-              {item.emoji}
-            </span>
+            {item.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.image}
+                alt={item.label}
+                style={{ width: isMobile ? item.mobileSize : item.size, height: isMobile ? item.mobileSize : item.size }}
+                className="block object-contain transition-transform duration-150 hover:scale-110"
+              />
+            ) : (
+              <span
+                style={{ fontSize: isMobile ? item.mobileSize : item.size }}
+                className="block leading-none transition-transform duration-150 hover:scale-110"
+              >
+                {item.emoji}
+              </span>
+            )}
           </div>
         </div>
       ))}
