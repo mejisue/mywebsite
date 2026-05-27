@@ -26,6 +26,23 @@ export type Post = {
     createdAt: string;
 };
 
+export type PostPage = {
+    content: PostSummary[];
+    page: number;
+    size: number;
+    hasNext: boolean;
+};
+
+export async function getPostsPage(page: number, size: number): Promise<PostPage> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts?page=${page}&size=${size}`, {
+        cache: 'no-store',
+    });
+    if (!res.ok) {
+        throw new Error('게시물 목록을 불러오는데 실패했습니다.');
+    }
+    return res.json();
+}
+
 export async function getPosts(): Promise<PostSummary[]> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts`, {
         cache: 'no-store',
