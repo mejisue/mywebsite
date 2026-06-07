@@ -150,6 +150,49 @@ const PROJECT_ITEMS: (ProjectItem & {
         },
       },
     },
+    {
+      id: 'project4',
+      emoji: '🖼️',
+      label: 'Design System',
+      desc: 'UI 컴포넌트 라이브러리',
+      pos: { position: 'absolute', top: '15%', right: '10%' },
+      size: '4rem',
+      mobilePos: { position: 'absolute', top: '23%', right: '8%' },
+      mobileSize: '3rem',
+      detail: {
+        description: 'Tailwind v4 디자인 토큰 + CVA variant 시스템 기반 컴포넌트 라이브러리.\n실제 포트폴리오 프로젝트(retweet, myWebsite)의 반복 패턴을 추출해 구현했습니다.',
+        techStack: ['Vite', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'CVA', 'Storybook 10', 'Vercel'],
+        designPoints: [
+          {
+            title: 'Tailwind v4 디자인 토큰',
+            problem: '컴포넌트마다 색상·radius 값을 하드코딩하면 디자인 변경 시 전체 수정 필요',
+            solution: '@theme {} 블록에서 토큰 정의 → Tailwind가 유틸리티 클래스 자동 생성. 다크모드는 .dark {}에서 토큰 값만 교체 — 컴포넌트 코드 변경 없음.',
+            result: '--color-primary 하나만 바꾸면 모든 컴포넌트에 즉시 반영',
+          },
+          {
+            title: 'CVA로 variant 선언',
+            problem: 'if문 기반 className 조합은 variant가 늘어날수록 관리 복잡도 증가',
+            solution: 'CVA variant 테이블로 선언형 관리. VariantProps<typeof button>으로 TypeScript 타입 자동 추론 — 존재하지 않는 variant 컴파일 에러로 차단.',
+          },
+          {
+            title: '컴포넌트 추출 기준',
+            problem: '무분별한 추상화는 오히려 유지보수 부담',
+            solution: '실제 프로젝트 코드에서 3회 이상 반복된 패턴만 추출.',
+          },
+        ],
+        features: [
+          'Button — 6 variants · loading · asChild(Radix Slot)',
+          'Input / InputField — size · error · icon 슬롯 · label 자동 연결(useId)',
+          'Textarea / TextareaField — CSS field-sizing auto-resize',
+          'Avatar — 이미지 로드 실패 시 이니셜 fallback',
+          'Skeleton — block / circle · className으로 크기 지정',
+        ],
+        links: {
+          storybook: 'https://design-system-rouge-five.vercel.app',
+          github: 'https://github.com/mejisue/design-system',
+        },
+      },
+    },
   ];
 
 const NAV_ITEMS = [
@@ -184,7 +227,6 @@ const NAV_ITEMS = [
 const DECO_ITEMS = [
   { id: 'plant', emoji: '🪴', size: '3.8rem', pos: { position: 'absolute', bottom: '42%', left: '4%' } as React.CSSProperties, mobileSize: '2.3rem', mobilePos: { position: 'absolute', bottom: '42%', left: '2%' } as React.CSSProperties },
   { id: 'sofa', emoji: '🛋️', size: '7rem', pos: { position: 'absolute', bottom: '41%', right: '3%' } as React.CSSProperties, mobileSize: '4.2rem', mobilePos: { position: 'absolute', bottom: '41%', right: '1%' } as React.CSSProperties },
-  { id: 'frame', emoji: '🖼️', size: '3.2rem', pos: { position: 'absolute', top: '27%', right: '15%' } as React.CSSProperties, mobileSize: '2rem', mobilePos: { position: 'absolute', top: '26%', right: '10%' } as React.CSSProperties },
 ];
 
 /* ──────────────── SVG Components ──────────────── */

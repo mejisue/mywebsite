@@ -33,6 +33,7 @@ export type ProjectDetail = {
   links: {
     site?: string;
     github?: string;
+    storybook?: string;
   };
   image?: string;
   demoGif?: string;
@@ -216,6 +217,16 @@ export default function ProjectModal({ project, onClose }: Props) {
                 >
                   {GITHUB_ICON}
                   GitHub
+                </a>
+              )}
+              {detail.links.storybook && (
+                <a
+                  href={detail.links.storybook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-full border border-[#FF4785] bg-white px-4 py-1.5 text-xs font-bold text-[#FF4785] hover:bg-pink-50 transition-colors"
+                >
+                  Storybook ↗
                 </a>
               )}
             </div>
