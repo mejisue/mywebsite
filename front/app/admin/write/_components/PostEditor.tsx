@@ -1,14 +1,14 @@
 'use client';
 
-import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { Bold, Code2, Image as ImageIcon, Italic, Quote, Strikethrough as StrikethroughIcon } from 'lucide-react';
+import { Bold, Code2, Image as ImageIcon, Italic, ListTodo, Quote, Strikethrough as StrikethroughIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadImage } from '@/lib/api/posts';
 
-type MarkdownType = 'h1' | 'h2' | 'h3' | 'h4' | 'bold' | 'italic' | 'strike' | 'quote' | 'code';
+type MarkdownType = 'h1' | 'h2' | 'h3' | 'h4' | 'bold' | 'italic' | 'strike' | 'quote' | 'code' | 'todo';
 
 export type PostData = { title: string; content: string; tags: string[] };
 
@@ -41,6 +41,8 @@ export default function PostEditor({
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const imageInputRef = useRef<HTMLInputElement | null>(null);
+    const imageCursorPosRef = useRef<number | null>(null);
+    const previewRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (initialTitle !== undefined) setTitle(initialTitle);
@@ -82,19 +84,31 @@ export default function PostEditor({
         const files = Array.from(e.target.files);
         e.target.value = '';
 
+        const insertAt = imageCursorPosRef.current;
+
         for (const file of files) {
             const previewUrl = URL.createObjectURL(file);
             const placeholder = `![업로드 중...](${previewUrl})`;
+
             setContent((prev) => {
-                const prefix = prev.trim() ? `${prev}\n\n` : '';
-                return `${prefix}${placeholder}`;
+                if (insertAt === null) {
+                    const prefix = prev.trim() ? `${prev}\n\n` : '';
+                    return `${prefix}${placeholder}`;
+                }
+                const before = prev.slice(0, insertAt);
+                const after = prev.slice(insertAt);
+                const prefix = before.length > 0 && !before.endsWith('\n\n')
+                    ? (before.endsWith('\n') ? '\n' : '\n\n')
+                    : '';
+                const suffix = after.length > 0 ? '\n\n' : '';
+                return `${before}${prefix}${placeholder}${suffix}${after}`;
             });
 
             try {
                 const { url } = await uploadImage(file);
                 setContent((prev) => prev.replace(placeholder, `![이미지](${url})`));
             } catch {
-                setContent((prev) => prev.replace(`\n\n${placeholder}`, '').replace(placeholder, ''));
+                setContent((prev) => prev.replace(placeholder, ''));
                 toast.error('이미지 업로드에 실패했습니다.');
             } finally {
                 URL.revokeObjectURL(previewUrl);
@@ -103,21 +117,19 @@ export default function PostEditor({
     };
 
     const handleEditorKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key !== 'Tab') return;
-
-        e.preventDefault();
         const textarea = textareaRef.current;
         if (!textarea) return;
 
         const start = textarea.selectionStart ?? 0;
         const end = textarea.selectionEnd ?? 0;
-        const tab = '    ';
 
+        if (e.key !== 'Tab') return;
+
+        e.preventDefault();
+        const tab = '    ';
         const before = content.slice(0, start);
         const after = content.slice(end);
-        const nextContent = `${before}${tab}${after}`;
-
-        setContent(nextContent);
+        setContent(`${before}${tab}${after}`);
 
         const cursorPos = start + tab.length;
         requestAnimationFrame(() => {
@@ -142,16 +154,21 @@ export default function PostEditor({
         let nextSelectionEnd: number | null = null;
 
         switch (type) {
-            case 'h1': replaced = `# ${selected || '제목'}`; break;
-            case 'h2': replaced = `## ${selected || '소제목'}`; break;
-            case 'h3': replaced = `### ${selected || '소제목'}`; break;
-            case 'h4': replaced = `#### ${selected || '소제목'}`; break;
-            case 'bold': replaced = `**${selected || '굵게'}**`; break;
-            case 'italic': replaced = `_${selected || '기울임'}_`; break;
-            case 'strike': replaced = `~~${selected || '취소선'}~~`; break;
+            case 'h1': replaced = `# ${selected}`; if (!selected) { nextSelectionStart = before.length + 2; nextSelectionEnd = nextSelectionStart; } break;
+            case 'h2': replaced = `## ${selected}`; if (!selected) { nextSelectionStart = before.length + 3; nextSelectionEnd = nextSelectionStart; } break;
+            case 'h3': replaced = `### ${selected}`; if (!selected) { nextSelectionStart = before.length + 4; nextSelectionEnd = nextSelectionStart; } break;
+            case 'h4': replaced = `#### ${selected}`; if (!selected) { nextSelectionStart = before.length + 5; nextSelectionEnd = nextSelectionStart; } break;
+            case 'bold': replaced = selected ? `**${selected}**` : '****'; if (!selected) { nextSelectionStart = before.length + 2; nextSelectionEnd = nextSelectionStart; } break;
+            case 'italic': replaced = selected ? `_${selected}_` : '__'; if (!selected) { nextSelectionStart = before.length + 1; nextSelectionEnd = nextSelectionStart; } break;
+            case 'strike': replaced = selected ? `~~${selected}~~` : '~~~~'; if (!selected) { nextSelectionStart = before.length + 2; nextSelectionEnd = nextSelectionStart; } break;
             case 'quote': {
-                const target = selected || '인용문';
-                replaced = target.split('\n').map((line) => (line ? `> ${line}` : '>')).join('\n');
+                if (selected) {
+                    replaced = selected.split('\n').map((line) => (line ? `> ${line}` : '>')).join('\n');
+                } else {
+                    replaced = '> ';
+                    nextSelectionStart = before.length + replaced.length;
+                    nextSelectionEnd = nextSelectionStart;
+                }
                 break;
             }
             case 'code': {
@@ -163,6 +180,16 @@ export default function PostEditor({
                     nextSelectionEnd = nextSelectionStart + placeholderLang.length;
                 } else {
                     replaced = `\n\`\`\`text\n${selected}\n\`\`\`\n`;
+                }
+                break;
+            }
+            case 'todo': {
+                if (selected) {
+                    replaced = selected.split('\n').map((line) => (line ? `- [ ] ${line}` : '')).join('\n');
+                } else {
+                    replaced = '- [ ] ';
+                    nextSelectionStart = before.length + replaced.length;
+                    nextSelectionEnd = nextSelectionStart;
                 }
                 break;
             }
@@ -180,6 +207,37 @@ export default function PostEditor({
             textarea.setSelectionRange(cursorPos, cursorPos);
         });
     };
+
+    const previewComponents = useMemo(() => ({
+        input: ({ type, checked }: React.InputHTMLAttributes<HTMLInputElement>) => {
+            if (type !== 'checkbox') return <input type={type} />;
+            return (
+                <input
+                    type="checkbox"
+                    checked={checked ?? false}
+                    onChange={(e) => {
+                        const container = previewRef.current;
+                        if (!container) return;
+                        const all = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+                        const idx = all.indexOf(e.currentTarget);
+                        if (idx === -1) return;
+                        setContent((prev) => {
+                            let count = 0;
+                            return prev.replace(/- \[[ x]\]/g, (match) => {
+                                if (count++ === idx) return match === '- [ ]' ? '- [x]' : '- [ ]';
+                                return match;
+                            });
+                        });
+                    }}
+                />
+            );
+        },
+        img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+            if (!src) return null;
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img src={src} alt={alt ?? '이미지'} {...props} />;
+        },
+    }), []);
 
     if (isLoading) {
         return <div className="flex min-h-screen items-center justify-center text-sm text-neutral-400">불러오는 중...</div>;
@@ -216,7 +274,7 @@ export default function PostEditor({
                                     key={tag}
                                     type="button"
                                     onClick={() => removeTag(tag)}
-                                    className="rounded-full bg-emerald-100 px-3 py-0.5 text-sm text-emerald-700 hover:bg-emerald-200"
+                                    className="rounded-full bg-sky-100 px-3 py-0.5 text-sm text-sky-700 hover:bg-sky-200"
                                 >
                                     {tag}
                                 </button>
@@ -235,20 +293,23 @@ export default function PostEditor({
 
                     {/* 툴바 */}
                     <div className="flex items-center gap-3 text-sm text-neutral-500">
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('h1')}>H1</button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('h2')}>H2</button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('h3')}>H3</button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('h4')}>H4</button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('h1')}>H1</button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('h2')}>H2</button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('h3')}>H3</button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('h4')}>H4</button>
                         <span className="mx-1 h-4 w-px bg-neutral-200" />
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('bold')}><Bold className="h-4 w-4" /></button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('italic')}><Italic className="h-4 w-4" /></button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('strike')}><StrikethroughIcon className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('bold')}><Bold className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('italic')}><Italic className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('strike')}><StrikethroughIcon className="h-4 w-4" /></button>
                         <span className="mx-1 h-4 w-px bg-neutral-200" />
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('quote')}><Quote className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('quote')}><Quote className="h-4 w-4" /></button>
                         <button
                             type="button"
-                            className="rounded px-1 py-0.5 hover:bg-neutral-100"
-                            onClick={() => imageInputRef.current?.click()}
+                            className="rounded px-1 py-0.5 hover:bg-sky-100"
+                            onClick={() => {
+                                imageCursorPosRef.current = textareaRef.current?.selectionStart ?? null;
+                                imageInputRef.current?.click();
+                            }}
                         >
                             <input
                                 ref={imageInputRef}
@@ -260,7 +321,8 @@ export default function PostEditor({
                             />
                             <ImageIcon className="h-4 w-4" />
                         </button>
-                        <button type="button" className="rounded px-1 py-0.5 hover:bg-neutral-100" onClick={() => insertMarkdown('code')}><Code2 className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('code')}><Code2 className="h-4 w-4" /></button>
+                        <button type="button" className="rounded px-1 py-0.5 hover:bg-sky-100" onClick={() => insertMarkdown('todo')}><ListTodo className="h-4 w-4" /></button>
                     </div>
 
                     {/* 본문 입력 */}
@@ -286,25 +348,19 @@ export default function PostEditor({
 
                     <div className="flex flex-wrap gap-2">
                         {tags.map((tag) => (
-                            <span key={tag} className="rounded-full bg-emerald-100 px-3 py-0.5 text-sm text-emerald-700">
+                            <span key={tag} className="rounded-full bg-sky-100 px-3 py-0.5 text-sm text-sky-700">
                                 {tag}
                             </span>
                         ))}
                     </div>
 
                     <div className="mt-4 flex-1 overflow-auto text-base leading-relaxed">
-                        <div className="markdown-body">
+                        <div className="markdown-body" ref={previewRef}>
                             <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
                                 rehypePlugins={[rehypeRaw]}
                                 urlTransform={(url) => url}
-                                components={{
-                                    img: (props) => {
-                                        if (!props.src || props.src === '') return null;
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        return <img {...props} alt={props.alt ?? '이미지'} />;
-                                    },
-                                }}
+                                components={previewComponents}
                             >
                                 {content || '컨텐츠를 입력해주세요'}
                             </ReactMarkdown>
@@ -338,7 +394,7 @@ export default function PostEditor({
                         }}
                         type="button"
                         disabled={isPending}
-                        className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isPending ? pendingLabel : submitLabel}
                     </button>
