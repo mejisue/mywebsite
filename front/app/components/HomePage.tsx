@@ -131,8 +131,50 @@ const PROJECT_ITEMS: (ProjectItem & {
       mobilePos: { position: 'absolute', top: '23%', left: '42%' },
       mobileSize: '5rem',
       detail: {
-        description: 'Twitter(X) 스타일 스레드형 SNS 풀스택 구현.',
+        description: '팔로우·좋아요·중첩 댓글이 있는 스레드형 소셜 피드 서비스.\nSNS 특유의 빠른 인터랙션 피드백(낙관적 업데이트)과 E2E 인증(Redis 토큰 스토어 + 인터셉터 큐잉)을 풀스택으로 직접 설계했습니다.',
+        motivation: '좋아요·댓글처럼 빠른 피드백이 필요한 인터랙션에서 낙관적 업데이트와 캐시 무효화를 어떻게 조화시킬지, OAuth 이후 JWT 환경에서 토큰 만료를 사용자에게 투명하게 처리할지를 풀고 싶었습니다. FE/BE 경계에서 만나는 구조적 문제를 직접 설계하는 게 목표였습니다.',
         techStack: ['Next.js', 'TypeScript', 'Spring Boot', 'MySQL', 'Redis', 'Spring Security'],
+        demoGif: '/retweet-demo.webm',
+        designPoints: [
+          {
+            title: 'E2E 인증 — Redis 토큰 스토어 + FE 인터셉터 큐잉',
+            problem: '동시 401 발생 시 Refresh 요청이 중복으로 발사되는 문제',
+            solution: 'Axios 인터셉터에서 Promise 큐잉으로 재시도 요청을 대기시키고, 백엔드는 Redis RTR(Refresh Token Rotation)로 단 1회만 발급.',
+            result: 'Refresh 단 1회, 세션 끊김 없음',
+            video: '/retweet-oauth.webm',
+          },
+          {
+            title: '낙관적 업데이트 + 정규화 캐시',
+            problem: '서버 응답 대기 시간 동안 UI가 지연되어 피드백이 늦게 느껴지는 문제',
+            solution: 'TanStack Query onMutate에서 선 업데이트, onError에서 자동 rollback. 쿼리키 정규화로 관련 캐시 일괄 무효화.',
+            result: '0ms 피드백, 실패 시 자동 롤백',
+          },
+          {
+            title: '2-depth 댓글 도메인 모델링',
+            problem: '무한 depth 재귀 구조는 JOIN 복잡도가 높고 N+1 발생 가능성이 큼',
+            solution: 'rootComment + parentComment FK 2개로 flat 저장 → 클라이언트에서 트리로 조립. JOIN 1회로 해결.',
+            result: 'JOIN 1회, N+1 없음',
+            video: '/retweet-comment.webm',
+          },
+          {
+            title: '성능 — 번들·CLS·가상화',
+            solution: 'next/image로 CLS 제거, dynamic import 코드스플릿으로 초기 번들 감소, react-virtual로 피드 DOM 고정.',
+            image: '/retweet-main.png',
+          },
+          {
+            title: 'Tailwind v4 + shadcn 토큰 기반 스타일 시스템',
+            problem: '다크모드 전환 시 컴포넌트마다 dark: 클래스를 개별 관리해야 하는 문제',
+            solution: 'CSS 변수 토큰으로 의미 단위 추상화, .dark {}에서 토큰 값만 교체. OKLCH 색공간, tailwind-merge cn() 조합.',
+            result: '다크모드 전환 코드 0줄 추가',
+            image: '/retweet-dark.png',
+          },
+          {
+            title: '레이어 단위 테스트 전략',
+            solution: 'vi.hoisted API mock, beforeEach 스토어 초기화, MemoryRouter 페이지 통합 테스트, 에러/로딩/정상 3-way 커버리지.',
+            result: '15 test files · 79 tests · 전체 통과',
+            image: '/retweet-vitest.png',
+          },
+        ],
         features: [
           '게시글 CRUD',
           '(중첩)댓글 기능',
@@ -142,7 +184,23 @@ const PROJECT_ITEMS: (ProjectItem & {
           '프로필 수정 기능',
           '다크모드 기능',
           'OAuth2 로그인 기능',
-
+        ],
+        troubleshooting: [
+          {
+            title: '댓글 삭제 FK 제약 위반',
+            problem: '부모 댓글 삭제 시 자식 댓글의 FK 제약으로 삭제 실패',
+            solution: '트랜잭션 내 자식 댓글 먼저 삭제 후 부모 삭제 순서로 처리',
+          },
+          {
+            title: 'OAuth Profile NPE',
+            problem: 'picture 필드가 null인 OAuth 계정 로그인 시 NPE 발생',
+            solution: 'OAuth2UserInfo 추상화 클래스에 getProfileImage() fallback 추가',
+          },
+          {
+            title: '삭제된 게시글 URL 접근 무한 로딩',
+            problem: '삭제된 게시글 URL 직접 접근 시 로딩 스피너가 무한 표시',
+            solution: '서버에서 404 응답 시 notFound() 호출, ErrorBoundary로 사용자 안내 처리',
+          },
         ],
         links: {
           site: 'https://retweet.mejisue.site',
