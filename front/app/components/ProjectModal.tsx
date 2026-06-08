@@ -14,6 +14,7 @@ export type DesignPoint = {
   solution: string;
   result?: string;
   video?: string;
+  image?: string;
 };
 
 export type TroubleshootingItem = {
@@ -145,6 +146,10 @@ export default function ProjectModal({ project, onClose }: Props) {
                           )}
                           {point.video && (
                             <video src={point.video} autoPlay loop muted playsInline className="w-full rounded-lg border border-neutral-200 mt-1" />
+                          )}
+                          {point.image && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={point.image} alt={point.title} className="w-full rounded-lg border border-neutral-200 mt-1 object-cover" />
                           )}
                         </div>
                       </div>
