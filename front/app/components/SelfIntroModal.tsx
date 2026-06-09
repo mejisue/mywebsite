@@ -56,6 +56,14 @@ export default function SelfIntroModal({ open, onClose }: Props) {
             팀의 페이스에 맞춰 영리하게 몰입하는 동료가 되겠습니다.
           </p>
 
+          {/* Experience Highlight */}
+          <p
+            className="text-sm text-[#1B4332] leading-[1.85] border-l-[3px] border-[#40916C] pl-3 font-medium"
+            style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+          >
+            Next.js + Spring Boot 풀스택 서비스를 AWS EC2 + Docker Compose로 직접 구축해 운영 중입니다.
+          </p>
+
           {/* Tech Stack */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#40916C] mb-2">Tech Stack</p>
