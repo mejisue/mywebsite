@@ -35,13 +35,12 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    /**
-     * 조회 전용임(readOnly = true), DB 성능 최적화
-     */
-    @Transactional(readOnly = true)
+    @Transactional
     public Post getPost(Long id) {
-        return postRepository.findById(id)
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다. id=" + id));
+        post.incrementViewCount();
+        return post;
     }
 
     @Transactional

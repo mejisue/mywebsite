@@ -79,6 +79,7 @@ class PostServiceTest {
         // then
         assertThat(result.getTitle()).isEqualTo("제목");
         assertThat(result.getContent()).isEqualTo("내용");
+        assertThat(result.getViewCount()).isEqualTo(1);
     }
 
     @Test
