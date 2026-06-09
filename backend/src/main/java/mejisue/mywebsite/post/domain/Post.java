@@ -32,4 +32,11 @@ public class Post extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "post_id")
     private List<PostImage> images = new ArrayList<>();
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int viewCount = 0;
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 }

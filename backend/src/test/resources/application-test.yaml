@@ -1,4 +1,4 @@
-ㅂsite:
+site:
   backend-secret: test-secret
 
 aws:
