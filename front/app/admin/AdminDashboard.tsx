@@ -88,7 +88,7 @@ export default function AdminDashboard({ stats }: { stats: AdminStats }) {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto w-full min-w-[550px] max-w-5xl space-y-6">
         <div>
           <p className="text-sm text-gray-600">관리자 페이지</p>
           <h1 className="text-2xl font-bold text-gray-800">대시보드</h1>
@@ -171,7 +171,7 @@ export default function AdminDashboard({ stats }: { stats: AdminStats }) {
                     iconType="circle"
                     iconSize={8}
                     wrapperStyle={{ fontSize: "12px", color: "#374151" }}
-                  formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
+                    formatter={(value) => <span style={{ color: "#374151" }}>{value}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>
