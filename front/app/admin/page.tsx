@@ -10,7 +10,7 @@ export default async function AdminPage() {
     return <div>접근 권한이 없습니다.</div>;
   }
 
-  const res = await fetch("http://localhost:8080/api/admin/stats", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/admin/stats`, {
     headers: {
       "X-ADMIN-SECRET": process.env.BACKEND_SECRET_KEY!,
     },
