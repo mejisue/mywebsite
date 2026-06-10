@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Bebas_Neue } from "next/font/google";
+import { Geist, Geist_Mono, Bebas_Neue, Nanum_Gothic } from "next/font/google";
 import "./globals.css";
 import Providers from "./components/Providers";
 import { Toaster } from "sonner";
+
+const nanumGothic = Nanum_Gothic({
+  variable: "--font-nanum-gothic",
+  subsets: ["latin"],
+  weight: ["700", "800"],
+})
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +37,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${nanumGothic.variable} antialiased`}
       >
         <Providers>
           {children}
