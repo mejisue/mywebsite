@@ -1,12 +1,9 @@
-import { getPost } from '@/lib/api/posts';
+import { getPost, getPosts } from '@/lib/api/posts';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import Image from 'next/image';
-import Link from 'next/link';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import DeletePostButton from './_components/DeletePostButton';
+import PostAdminActions from './_components/PostAdminActions';
 import { formatTimeAgo } from '@/lib/time';
 import { notFound } from 'next/navigation';
 import { preload } from 'react-dom';
@@ -14,6 +11,17 @@ import { preload } from 'react-dom';
 function extractFirstImageUrl(markdown: string): string | null {
     const match = markdown.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
     return match ? match[1] : null;
+}
+
+// 빌드 시점에 모든 글의 상세 페이지를 미리 만들어 둔다.
+// 목록에 없는 새 글은 첫 방문 때 만들어져 캐시된다.
+export async function generateStaticParams() {
+    try {
+        const posts = await getPosts();
+        return posts.map((post) => ({ id: String(post.id) }));
+    } catch {
+        return [];
+    }
 }
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,8 +34,6 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         notFound();
     }
 
-    const session = await getServerSession(authOptions);
-    const isAdmin = session?.user?.email === process.env.ADMIN_EMAIL;
     const firstImageUrl = extractFirstImageUrl(post.content);
     if (firstImageUrl) preload(firstImageUrl, { as: 'image', fetchPriority: 'high' });
 
@@ -43,14 +49,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                         {/* TODO: createdAt 필드가 entity에 추가되면 날짜로 교체 */}
                         <span>{formatTimeAgo(post.createdAt)}</span>
                     </div>
-                    {isAdmin && (
-                        <div className="flex items-center gap-3">
-                            <Link href={`/admin/write/${id}`} className="hover:text-neutral-800">
-                                수정
-                            </Link>
-                            <DeletePostButton id={id} />
-                        </div>
-                    )}
+                    <PostAdminActions id={id} />
                 </div>
 
                 <hr className="my-8 border-neutral-100" />

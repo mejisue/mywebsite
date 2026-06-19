@@ -1,3 +1,5 @@
+import { revalidatePostCache } from '@/lib/actions/posts';
+
 export type CreatePostRequest = {
     title: string;
     content: string;
@@ -45,7 +47,7 @@ export async function getPostsPage(page: number, size: number): Promise<PostPage
 
 export async function getPosts(): Promise<PostSummary[]> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts`, {
-        cache: 'no-store',
+        next: { tags: ['posts'], revalidate: 3600 },
     });
     if (!res.ok) {
         throw new Error('게시물 목록을 불러오는데 실패했습니다.');
@@ -56,7 +58,7 @@ export async function getPosts(): Promise<PostSummary[]> {
 
 export async function getPost(id: string): Promise<Post> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts/${id}`, {
-        cache: 'no-store',
+        next: { tags: ['posts', `post-${id}`], revalidate: 3600 },
     });
     if (!res.ok) {
         throw new Error('게시물을 불러오는데 실패했습니다.');
@@ -78,6 +80,14 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
     return res.json();
 }
 
+async function revalidatePosts(id?: string): Promise<void> {
+    try {
+        await revalidatePostCache(id);
+    } catch {
+        // 캐시 무효화 실패는 치명적이지 않다. 최대 1시간 뒤 자동 갱신된다.
+    }
+}
+
 export async function createPost(data: CreatePostRequest): Promise<Post> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/posts`, {
         method: 'POST',
@@ -89,7 +99,9 @@ export async function createPost(data: CreatePostRequest): Promise<Post> {
     if (!res.ok) {
         throw new Error('출간에 실패했습니다.');
     }
-    return res.json();
+    const post = await res.json();
+    await revalidatePosts(String(post.id));
+    return post;
 }
 
 
@@ -104,6 +116,7 @@ export async function updatePost(id: string, data: UpdatePostRequest): Promise<v
     if (!res.ok) {
         throw new Error('게시물 수정에 실패했습니다.');
     }
+    await revalidatePosts(id);
 }
 
 export async function deletePost(id: string): Promise<void> {
@@ -113,4 +126,5 @@ export async function deletePost(id: string): Promise<void> {
     if (!res.ok) {
         throw new Error('게시물 삭제에 실패했습니다.');
     }
+    await revalidatePosts(id);
 }
