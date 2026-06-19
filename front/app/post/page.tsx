@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { formatTimeAgo } from '@/lib/time';
 
 export default async function PostListPage() {
-    const posts = await getPosts();
+    let posts: Awaited<ReturnType<typeof getPosts>> = [];
+    try {
+        posts = await getPosts();
+    } catch {
+        // 빌드/렌더 시 백엔드 연결 실패 시 빈 목록으로 처리
+    }
 
     return (
         <div className="flex min-h-screen justify-center bg-white">
